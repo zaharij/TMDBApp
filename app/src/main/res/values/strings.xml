@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">TMDBApp</string>
+    <string name="api_key">ab5fd4c24928a00b2f0d09efdcdaa083</string>
+    <string name="language_en_US">en_US</string>
+    <string name="rating">rating:\u00A0\</string>
+    <string name="genre">Genre:\u00A0\</string>
+    <string name="year_country">Year|Country:\u00A0\</string>
+</resources>
