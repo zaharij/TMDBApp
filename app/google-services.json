@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "773704368814",
+    "project_id": "tmdbapp"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:773704368814:android:54e1f52251c0dbe7",
+        "android_client_info": {
+          "package_name": "com.centaurs.tmdbapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "773704368814-q7ob4lharddeo7ffrjclgto33o19omcn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.centaurs.tmdbapp",
+            "certificate_hash": "53a1fb649897c5ff961f580091aaab7d2cd6d157"
+          }
+        },
+        {
+          "client_id": "773704368814-uvv82jtpfl9qli83gr5l1k2uu5hdvqeh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdUsPWyjfcfpQEpm0EAy1LH5-0nmzsSJM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
