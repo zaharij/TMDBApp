@@ -36,33 +36,14 @@ public class MoviesActivity extends AppCompatActivity {
                 .addToBackStack(null).commit();
     }
 
-    @Override
-    public void onBackPressed() {
-        if (getSupportFragmentManager().getBackStackEntryCount() != 0) {
-            getSupportFragmentManager().popBackStack();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
     public class CheckNetwork extends AsyncTask<Void, Void , Boolean>{
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-            boolean haveConnectedWifi = false;
-            boolean haveConnectedMobile = false;
-
-            ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo[] netInfo = cm.getAllNetworkInfo();
-            for (NetworkInfo ni : netInfo) {
-                if (ni.getTypeName().equalsIgnoreCase("WIFI"))
-                    if (ni.isConnected())
-                        haveConnectedWifi = true;
-                if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
-                    if (ni.isConnected())
-                        haveConnectedMobile = true;
-            }
-            return haveConnectedWifi || haveConnectedMobile;
+            ConnectivityManager connectivityManager
+                    = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
         }
 
         @Override
@@ -70,7 +51,8 @@ public class MoviesActivity extends AppCompatActivity {
             super.onPostExecute(aBoolean);
             if (!aBoolean){
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.grid_movies_fragment_container, new ConnectionTroublesFragment()).commit();
+                        .replace(R.id.grid_movies_fragment_container, new ConnectionTroublesFragment())
+                        .disallowAddToBackStack().commit();
             }
         }
     }

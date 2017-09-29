@@ -34,6 +34,8 @@ public class ConnectionTroublesFragment extends Fragment{
         retrytButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                ((MoviesActivity) getActivity()).getSupportFragmentManager().beginTransaction()
+                        .remove(ConnectionTroublesFragment.this).commit();
                 ((MoviesActivity) getActivity()).startMoviesFragment();
                 ((MoviesActivity) getActivity()).startCheckingNetwork();
             }
