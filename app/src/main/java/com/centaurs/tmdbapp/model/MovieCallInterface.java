@@ -9,16 +9,20 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface MovieCallInterface {
+    String API_KEY_QUERY = "api_key";
+    String LANGUAGE_KEY = "language";
+    String PAGE_QUERY = "page";
+
     @GET("movie/top_rated")
     Call<TopRatedMovies> getTopRatedMovies(
-        @Query("api_key") String apiKey,
-        @Query("language") String language,
-        @Query("page") int pageIndex
+        @Query(API_KEY_QUERY) String apiKey,
+        @Query(LANGUAGE_KEY) String language,
+        @Query(PAGE_QUERY) int pageIndex
     );
 
     @GET("genre/movie/list")
     Call<MovieGenres> getMovieGenres(
-        @Query("api_key") String apiKey,
-        @Query("language") String language
+        @Query(API_KEY_QUERY) String apiKey,
+        @Query(LANGUAGE_KEY) String language
     );
 }

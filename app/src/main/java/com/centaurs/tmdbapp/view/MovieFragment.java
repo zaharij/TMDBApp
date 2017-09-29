@@ -10,14 +10,23 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.model.models.Genre;
 import com.centaurs.tmdbapp.presenter.pagination.PaginationAdapter;
 
 import java.util.List;
 
+import static com.centaurs.tmdbapp.model.constants.Constants.BIG_POSTER_SIZE_W_H;
+import static com.centaurs.tmdbapp.model.constants.Constants.EMPTY_STRING;
 import static com.centaurs.tmdbapp.model.constants.Constants.GET_DATE_INDEXES_ARR;
 import static com.centaurs.tmdbapp.model.constants.Constants.VERTICAL_DIVIDER;
+import static com.centaurs.tmdbapp.model.constants.Constants.WORDS_DIVIDER;
+import static com.centaurs.tmdbapp.model.constants.QueryConstants.BASE_URL_IMG;
 
 public class MovieFragment extends Fragment {
     private static final String MOVIE_ID_ARG = "movie_id";
@@ -63,6 +72,20 @@ public class MovieFragment extends Fragment {
         genresTextView.setText(getActivity().getResources().getString(R.string.genre).concat(getGenres()));
         overviewTextView.setText(paginationAdapter.getResult(movieId).getOverview());;
 
+        Glide.with(getActivity()).load(BASE_URL_IMG + paginationAdapter.getResult(movieId).getPosterPath())
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model
+                            , Target<GlideDrawable> target, boolean isFirstResource) {
+                        return false;
+                    }
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model
+                            , Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        return false;
+                    }
+                }).diskCacheStrategy(DiskCacheStrategy.ALL).centerCrop().crossFade()
+                .override(BIG_POSTER_SIZE_W_H[0], BIG_POSTER_SIZE_W_H[1]).into(posterImageView);
     }
 
     private String getGenres(){
@@ -70,7 +93,7 @@ public class MovieFragment extends Fragment {
         StringBuilder genresStrBuilder = new StringBuilder();
         for (int i = 0; i < genreIds.size(); i++){
             if (i != 0 && i < genreIds.size()){
-                genresStrBuilder.append(", ");
+                genresStrBuilder.append(WORDS_DIVIDER);
             }
             genresStrBuilder.append(getGenreByIdFromList(paginationAdapter.getMovieGenres().getGenres(), genreIds.get(i)));
         }
@@ -83,6 +106,6 @@ public class MovieFragment extends Fragment {
                 return genres.get(i).getName();
             }
         }
-        return "";
+        return EMPTY_STRING;
     }
 }

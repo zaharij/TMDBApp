@@ -37,6 +37,8 @@
             android:layout_marginStart="@dimen/activity_margin_content"
             android:layout_marginTop="@dimen/activity_margin_quarter"
             android:maxLines="1"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
             tools:text="Movie Title"/>
 
         <LinearLayout
@@ -54,6 +56,7 @@
                 android:ellipsize="end"
                 android:maxLines="2"
                 android:paddingStart="@dimen/activity_margin_half"
+                android:textColor="@android:color/black"
                 tools:text="Nowadays, user engagement is considered one of the most important metrics for the success of your app"/>
 
             <TextView
@@ -67,6 +70,7 @@
                 android:gravity="end"
                 android:maxLines="1"
                 android:paddingEnd="@dimen/activity_margin_half"
+                android:textColor="@android:color/black"
                 android:textStyle="bold"
                 tools:text="2009 | EN"/>
 

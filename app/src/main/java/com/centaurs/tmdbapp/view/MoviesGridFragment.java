@@ -32,7 +32,6 @@ public class MoviesGridFragment extends Fragment {
     private static final int GRID_COLUMNS_NUMBER = 2;
     private static final int SCROLLING_DURATION = 1000;
 
-    private GridLayoutManager gridLayoutManager;
     private PaginationAdapter paginationAdapter;
 
     private RecyclerView recyclerView;
@@ -43,14 +42,15 @@ public class MoviesGridFragment extends Fragment {
     private boolean isLastPage = false;
     private int TOTAL_PAGES = 1;
     private int currentPage = PAGE_START;
+    private boolean isMainProgressVisible = false;
 
     private MovieCallInterface movieCallInterface;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        isMainProgressVisible = true;
         paginationAdapter = PaginationAdapter.getPaginationAdapter(getActivity());
-        gridLayoutManager = new GridLayoutManager(getActivity(), GRID_COLUMNS_NUMBER);
         movieCallInterface = RetrofitConfig.getRetrofitClient().create(MovieCallInterface.class);
         loadFirstPage();
         callMovieGenres().enqueue(new Callback<MovieGenres>() {
@@ -72,13 +72,11 @@ public class MoviesGridFragment extends Fragment {
 
         recyclerView = (RecyclerView) view.findViewById(R.id.main_recycler);
         progressBar = (ProgressBar) view.findViewById(R.id.main_progress);
-
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), GRID_COLUMNS_NUMBER);
         recyclerView.setLayoutManager(gridLayoutManager);
-
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-
         recyclerView.setAdapter(paginationAdapter);
-
+        setMainProgressVisibility();
         recyclerView.addOnScrollListener(new PaginationScrollListener(gridLayoutManager) {
             @Override
             protected void loadMoreItems() {
@@ -111,12 +109,21 @@ public class MoviesGridFragment extends Fragment {
         return view;
     }
 
+    private void setMainProgressVisibility(){
+        if (isMainProgressVisible){
+            progressBar.setVisibility(View.VISIBLE);
+        } else {
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
     private void loadFirstPage() {
         callTopRatedMoviesApi().enqueue(new Callback<TopRatedMovies>() {
             @Override
             public void onResponse(Call<TopRatedMovies> call, Response<TopRatedMovies> response) {
                 List<Result> results = fetchResults(response);
-                progressBar.setVisibility(View.GONE);
+                isMainProgressVisible = false;
+                setMainProgressVisibility();
                 paginationAdapter.addAll(results);
 
                 if (currentPage <= TOTAL_PAGES) paginationAdapter.addLoadingFooter();
@@ -159,7 +166,7 @@ public class MoviesGridFragment extends Fragment {
 
     private Call<TopRatedMovies> callTopRatedMoviesApi() {
         return movieCallInterface.getTopRatedMovies(
-                getString(R.string.api_key),
+                getResources().getString(R.string.api_key),
                 getResources().getString(R.string.language_en_US),
                 currentPage
         );
@@ -167,7 +174,7 @@ public class MoviesGridFragment extends Fragment {
 
     private Call<MovieGenres> callMovieGenres() {
         return movieCallInterface.getMovieGenres(
-                getString(R.string.api_key),
+                getResources().getString(R.string.api_key),
                 getResources().getString(R.string.language_en_US)
         );
     }
