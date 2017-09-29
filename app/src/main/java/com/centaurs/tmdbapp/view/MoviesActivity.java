@@ -26,8 +26,8 @@ public class MoviesActivity extends AppCompatActivity {
     }
 
     public void startMoviesFragment(){
-        getSupportFragmentManager().beginTransaction().add(R.id.grid_movies_fragment_container, new MoviesGridFragment())
-                .addToBackStack(null).commit();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.grid_movies_fragment_container, new MoviesGridFragment()).commit();
     }
 
     public void onItemClick(View view){
