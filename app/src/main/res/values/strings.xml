@@ -5,4 +5,6 @@
     <string name="rating">rating:\u00A0\</string>
     <string name="genre">Genre:\u00A0\</string>
     <string name="year_country">Year|Country:\u00A0\</string>
+    <string name="no_connection_mess">There is no internet connection...</string>
+    <string name="restart_button_str">Retry</string>
 </resources>

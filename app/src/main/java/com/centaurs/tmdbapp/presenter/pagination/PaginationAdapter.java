@@ -96,28 +96,32 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         switch (getItemViewType(position)) {
             case ITEM:
                 final MovieViewHolder movieViewHolder = (MovieViewHolder) holder;
-                movieViewHolder.posterImageView.setId(position);
-                movieViewHolder.movieTitleTextView.setText(result.getTitle());
-                movieViewHolder.yearCountryTextView.setText(result.getReleaseDate()
-                        .substring(GET_DATE_INDEXES_ARR[0], GET_DATE_INDEXES_ARR[1])
-                        .concat(VERTICAL_DIVIDER).concat(result.getOriginalLanguage().toUpperCase()));
-                movieViewHolder.movieRatingTextView.setText(context.getResources().getString(R.string.rating)
-                        .concat(String.valueOf(result.getVoteAverage())));
-                Glide.with(context).load(BASE_URL_IMG + result.getPosterPath())
-                        .listener(new RequestListener<String, GlideDrawable>() {
-                            @Override
-                            public boolean onException(Exception e, String model
-                                    , Target<GlideDrawable> target, boolean isFirstResource) {
-                                movieViewHolder.progressBar.setVisibility(View.GONE);
-                                return false;
-                            }
-                            @Override
-                            public boolean onResourceReady(GlideDrawable resource, String model
-                                    , Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                                movieViewHolder.progressBar.setVisibility(View.GONE);
-                                return false;
-                            }
-                        }).diskCacheStrategy(DiskCacheStrategy.ALL).centerCrop().crossFade().into(movieViewHolder.posterImageView);
+                try {
+                    movieViewHolder.posterImageView.setId(position);
+                    movieViewHolder.movieTitleTextView.setText(result.getTitle());
+                    movieViewHolder.yearCountryTextView.setText(result.getReleaseDate()
+                            .substring(GET_DATE_INDEXES_ARR[0], GET_DATE_INDEXES_ARR[1])
+                            .concat(VERTICAL_DIVIDER).concat(result.getOriginalLanguage().toUpperCase()));
+                    movieViewHolder.movieRatingTextView.setText(context.getResources().getString(R.string.rating)
+                            .concat(String.valueOf(result.getVoteAverage())));
+                    Glide.with(context).load(BASE_URL_IMG + result.getPosterPath())
+                            .listener(new RequestListener<String, GlideDrawable>() {
+                                @Override
+                                public boolean onException(Exception e, String model
+                                        , Target<GlideDrawable> target, boolean isFirstResource) {
+                                    movieViewHolder.progressBar.setVisibility(View.GONE);
+                                    return false;
+                                }
+
+                                @Override
+                                public boolean onResourceReady(GlideDrawable resource, String model
+                                        , Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                    movieViewHolder.progressBar.setVisibility(View.GONE);
+                                    return false;
+                                }
+                            }).diskCacheStrategy(DiskCacheStrategy.ALL).centerCrop().crossFade().into(movieViewHolder.posterImageView);
+                } catch (NullPointerException ex) {
+                }
                 break;
 
             case LOADING:

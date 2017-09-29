@@ -30,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/activity_margin_quarter"
-                android:textColor="@color/background"
+                android:textColor="@color/cardview_light_background"
                 android:textSize="18sp"
                 android:textStyle="bold"/>
 
@@ -45,7 +45,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:padding="@dimen/activity_margin_quarter"
-                    android:textColor="@color/background"
+                    android:textColor="@color/cardview_light_background"
                     android:textStyle="bold"/>
 
                 <TextView
@@ -54,7 +54,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="5"
                     android:padding="@dimen/activity_margin_quarter"
-                    android:textColor="@color/background"
+                    android:textColor="@color/cardview_light_background"
                     android:textStyle="bold"/>
 
             </LinearLayout>
@@ -64,7 +64,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/activity_margin_quarter"
-                android:textColor="@color/background"/>
+                android:textColor="@color/cardview_light_background"/>
 
         </LinearLayout>
     </ScrollView>
