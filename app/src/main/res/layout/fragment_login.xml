@@ -11,31 +11,45 @@
     <ImageView
         android:id="@+id/profile_image_view"
         android:layout_width="match_parent"
-        android:layout_height="@android:dimen/thumbnail_height"
-        app:srcCompat="@mipmap/ic_launcher_round"/>
+        android:layout_height="@dimen/profile_height"
+        app:srcCompat="@drawable/ic_profile_empty"/>
 
     <TextView
         android:id="@+id/username_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/paddingItemDecorationEdge"
-        />
+        android:layout_marginBottom="@dimen/profile_height"
+        android:layout_marginLeft="@dimen/activity_margin"
+        android:layout_marginRight="@dimen/activity_margin"
+        android:layout_marginTop="@dimen/paddingItemDecorationEdge"
+        android:gravity="center"
+        android:textColor="@android:color/white"/>
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/movie_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/activity_margin_half"
         android:background="@color/colorPrimary"
-        android:textColor="@color/cardview_shadow_end_color"
+        android:textColor="@android:color/white"
         tools:text="movies"/>
 
     <Button
-        android:id="@+id/register_button"
+        android:id="@+id/account_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/paddingItemDecorationDefault"
         android:background="@color/colorPrimary"
-        android:textColor="@color/cardview_shadow_end_color"
+        android:drawableLeft="@drawable/ic_google"
+        android:paddingStart="@dimen/paddingItemDecorationDefault"
+        android:textColor="@android:color/white"
         tools:text="account"/>
+
+    <Button
+        android:id="@+id/sign_out_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/sign_out"
+        android:visibility="visible"
+        tools:visibility="gone"/>
 </LinearLayout>

@@ -12,5 +12,6 @@
     <dimen name="poster_grid_height">340dp</dimen>
     <dimen name="poster_img_heig">280dp</dimen>
     <dimen name="single_poster_height">500dp</dimen>
+    <dimen name="profile_height">100dp</dimen>
 
 </resources>

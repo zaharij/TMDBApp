@@ -17,8 +17,8 @@ public class MoviesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movies);
-        startMoviesFragment();
-        startCheckingNetwork();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.grid_movies_fragment_container, new LoginFragment()).commit();
     }
 
     public void startCheckingNetwork(){
@@ -27,7 +27,8 @@ public class MoviesActivity extends AppCompatActivity {
 
     public void startMoviesFragment(){
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.grid_movies_fragment_container, new MoviesGridFragment()).commit();
+                .add(R.id.grid_movies_fragment_container, new MoviesGridFragment())
+                .addToBackStack(null).commit();
     }
 
     public void onItemClick(View view){
@@ -37,7 +38,6 @@ public class MoviesActivity extends AppCompatActivity {
     }
 
     class CheckNetwork extends AsyncTask<Void, Void , Boolean>{
-
         @Override
         protected Boolean doInBackground(Void... voids) {
             ConnectivityManager connectivityManager

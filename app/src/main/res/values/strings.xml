@@ -7,4 +7,9 @@
     <string name="year_country">Year|Country:\u00A0\</string>
     <string name="no_connection_mess">There is no internet connection...</string>
     <string name="restart_button_str">Retry</string>
+    <string name="username_default_str">Signed out</string>
+    <string name="account_button_str">Sign In With Google Account</string>
+    <string name="movies_button_str">Movies</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="loading_str">Loading...</string>
 </resources>
