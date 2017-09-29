@@ -76,7 +76,7 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 break;
             case LOADING:
                 View view = inflater.inflate(R.layout.item_progress, parent, false);
-                viewHolder = new LoadingVH(view);
+                viewHolder = new LoadingViewHolder(view);
                 break;
         }
         return viewHolder;
@@ -119,7 +119,8 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                                     movieViewHolder.progressBar.setVisibility(View.GONE);
                                     return false;
                                 }
-                            }).diskCacheStrategy(DiskCacheStrategy.ALL).centerCrop().crossFade().into(movieViewHolder.posterImageView);
+                            }).diskCacheStrategy(DiskCacheStrategy.ALL).centerCrop().crossFade()
+                            .into(movieViewHolder.posterImageView);
                 } catch (NullPointerException ex) {
                 }
                 break;
@@ -208,9 +209,9 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
     }
 
-    protected class LoadingVH extends RecyclerView.ViewHolder{
+    protected class LoadingViewHolder extends RecyclerView.ViewHolder{
 
-        public LoadingVH(View itemView) {
+        public LoadingViewHolder(View itemView) {
             super(itemView);
         }
     }

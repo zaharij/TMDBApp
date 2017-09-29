@@ -36,7 +36,7 @@ public class MoviesActivity extends AppCompatActivity {
                 .addToBackStack(null).commit();
     }
 
-    public class CheckNetwork extends AsyncTask<Void, Void , Boolean>{
+    class CheckNetwork extends AsyncTask<Void, Void , Boolean>{
 
         @Override
         protected Boolean doInBackground(Void... voids) {
