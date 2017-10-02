@@ -32,9 +32,12 @@ public class MoviesActivity extends AppCompatActivity {
     }
 
     public void onItemClick(View view){
-        Fragment movieFragment = MovieFragment.getInstance(view.getId());
-        getSupportFragmentManager().beginTransaction().replace(R.id.grid_movies_fragment_container, movieFragment)
-                .addToBackStack(null).commit();
+        try {
+            Fragment movieFragment = MovieFragment.getInstance(view.getId());
+            getSupportFragmentManager().beginTransaction().replace(R.id.grid_movies_fragment_container, movieFragment)
+                    .addToBackStack(null).commit();
+        } catch (NullPointerException ex){
+        }
     }
 
     class CheckNetwork extends AsyncTask<Void, Void , Boolean>{

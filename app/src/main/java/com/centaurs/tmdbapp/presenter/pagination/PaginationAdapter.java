@@ -112,7 +112,6 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                                     movieViewHolder.progressBar.setVisibility(View.GONE);
                                     return false;
                                 }
-
                                 @Override
                                 public boolean onResourceReady(GlideDrawable resource, String model
                                         , Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
