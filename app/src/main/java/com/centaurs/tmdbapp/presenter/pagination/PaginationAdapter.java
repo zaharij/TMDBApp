@@ -169,7 +169,6 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         return getItemCount() == 0;
     }
 
-
     public void addLoadingFooter() {
         isLoadingAdded = true;
         add(new Result());
