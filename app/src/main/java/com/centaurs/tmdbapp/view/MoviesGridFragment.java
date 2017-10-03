@@ -145,7 +145,6 @@ public class MoviesGridFragment extends Fragment {
             return null;
         }
     }
-
     private void loadNextPage() {
         movieCall.callTopRatedMoviesApi(getActivity(), currentPage).enqueue(new Callback<TopRatedMovies>() {
             @Override
