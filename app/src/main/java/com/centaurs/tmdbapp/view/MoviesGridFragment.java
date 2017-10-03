@@ -80,7 +80,6 @@ public class MoviesGridFragment extends Fragment {
             protected void loadMoreItems() {
                 isLoading = true;
                 currentPage++;
-
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
