@@ -32,7 +32,7 @@
         android:layout_margin="@dimen/activity_margin_half"
         android:background="@color/colorPrimary"
         android:textColor="@android:color/white"
-        tools:text="movies"/>
+        android:text="@string/movies_button_str"/>
 
     <Button
         android:id="@+id/account_button"
@@ -43,7 +43,7 @@
         android:drawableLeft="@drawable/ic_google"
         android:paddingStart="@dimen/paddingItemDecorationDefault"
         android:textColor="@android:color/white"
-        tools:text="account"/>
+        android:text="@string/account_button_str"/>
 
     <Button
         android:id="@+id/sign_out_button"

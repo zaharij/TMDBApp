@@ -19,8 +19,7 @@
         <ImageView
             android:id="@+id/movie_poster"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/poster_img_heig"
-            android:onClick="onItemClick"/>
+            android:layout_height="@dimen/poster_img_heig"/>
 
         <ProgressBar
             android:id="@+id/movie_progress"

@@ -14,13 +14,13 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.centaurs.tmdbapp.R;
-import com.centaurs.tmdbapp.model.MovieCallInterface;
-import com.centaurs.tmdbapp.model.config.RetrofitConfig;
+import com.centaurs.tmdbapp.model.MovieCall;
 import com.centaurs.tmdbapp.model.models.MovieGenres;
 import com.centaurs.tmdbapp.model.models.Result;
 import com.centaurs.tmdbapp.model.models.TopRatedMovies;
-import com.centaurs.tmdbapp.presenter.pagination.PaginationAdapter;
-import com.centaurs.tmdbapp.presenter.pagination.PaginationScrollListener;
+import com.centaurs.tmdbapp.presenter.pagination.MovieResultsSingletone;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -34,33 +34,31 @@ public class MoviesGridFragment extends Fragment {
 
     private PaginationAdapter paginationAdapter;
 
-    private RecyclerView recyclerView;
     private ProgressBar progressBar;
-
+    private MovieCall movieCall;
     private static final int PAGE_START = 1;
     private boolean isLoading = false;
     private boolean isLastPage = false;
     private int TOTAL_PAGES = 1;
     private int currentPage = PAGE_START;
     private boolean isMainProgressVisible = false;
-
-    private MovieCallInterface movieCallInterface;
+    private MovieResultsSingletone movieResultsSingletone;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        movieCall = MovieCall.getInstance();
         isMainProgressVisible = true;
-        paginationAdapter = PaginationAdapter.getPaginationAdapter(getActivity());
-        movieCallInterface = RetrofitConfig.getRetrofitClient().create(MovieCallInterface.class);
+        movieResultsSingletone = MovieResultsSingletone.getMovieResultsSingletone();
+        paginationAdapter = new PaginationAdapter(getActivity(), movieResultsSingletone, onItemClickListener);
         loadFirstPage();
-        callMovieGenres().enqueue(new Callback<MovieGenres>() {
+        movieCall.callMovieGenres(getActivity()).enqueue(new Callback<MovieGenres>() {
             @Override
-            public void onResponse(Call<MovieGenres> call, Response<MovieGenres> response) {
-                paginationAdapter.setMovieGenres(response.body());
+            public void onResponse(@NotNull Call<MovieGenres> call, @NotNull Response<MovieGenres> response) {
+                movieResultsSingletone.setMovieGenres(response.body());
             }
-
             @Override
-            public void onFailure(Call<MovieGenres> call, Throwable t) {
+            public void onFailure(@NotNull Call<MovieGenres> call, @NotNull Throwable t) {
             }
         });
     }
@@ -70,8 +68,8 @@ public class MoviesGridFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_movies_grid, container, false);
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.main_recycler);
-        progressBar = (ProgressBar) view.findViewById(R.id.main_progress);
+        RecyclerView recyclerView = view.findViewById(R.id.main_recycler);
+        progressBar = view.findViewById(R.id.main_progress);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), GRID_COLUMNS_NUMBER);
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -118,64 +116,64 @@ public class MoviesGridFragment extends Fragment {
     }
 
     private void loadFirstPage() {
-        callTopRatedMoviesApi().enqueue(new Callback<TopRatedMovies>() {
+        movieCall.callTopRatedMoviesApi(getActivity(), currentPage).enqueue(new Callback<TopRatedMovies>() {
             @Override
-            public void onResponse(Call<TopRatedMovies> call, Response<TopRatedMovies> response) {
-                List<Result> results = fetchResults(response);
+            public void onResponse(@NotNull Call<TopRatedMovies> call, @NotNull Response<TopRatedMovies> response) {
                 isMainProgressVisible = false;
                 setMainProgressVisibility();
-                paginationAdapter.addAll(results);
-
+                putResultsToAdapter(response);
                 if (currentPage <= TOTAL_PAGES) paginationAdapter.addLoadingFooter();
                 else isLastPage = true;
             }
-
             @Override
-            public void onFailure(Call<TopRatedMovies> call, Throwable t) {
+            public void onFailure(@NotNull Call<TopRatedMovies> call, @NotNull Throwable t) {
                 t.printStackTrace();
             }
         });
+    }
 
+    private void putResultsToAdapter(@NotNull Response<TopRatedMovies> response) {
+        List<Result> results = fetchResults(response);
+        paginationAdapter.addAll(results);
     }
 
     private List<Result> fetchResults(Response<TopRatedMovies> response) {
         TopRatedMovies topRatedMovies = response.body();
-        return topRatedMovies.getResults();
+        if (topRatedMovies != null) {
+            return topRatedMovies.getResults();
+        } else {
+            return null;
+        }
     }
 
     private void loadNextPage() {
-        callTopRatedMoviesApi().enqueue(new Callback<TopRatedMovies>() {
+        movieCall.callTopRatedMoviesApi(getActivity(), currentPage).enqueue(new Callback<TopRatedMovies>() {
             @Override
-            public void onResponse(Call<TopRatedMovies> call, Response<TopRatedMovies> response) {
+            public void onResponse(@NotNull Call<TopRatedMovies> call, @NotNull Response<TopRatedMovies> response) {
                 paginationAdapter.removeLoadingFooter();
                 isLoading = false;
-
-                List<Result> results = fetchResults(response);
-                paginationAdapter.addAll(results);
-
+                putResultsToAdapter(response);
                 if (currentPage != TOTAL_PAGES) paginationAdapter.addLoadingFooter();
                 else isLastPage = true;
             }
 
             @Override
-            public void onFailure(Call<TopRatedMovies> call, Throwable t) {
+            public void onFailure(@NotNull Call<TopRatedMovies> call, @NotNull Throwable t) {
                 t.printStackTrace();
             }
         });
     }
 
-    private Call<TopRatedMovies> callTopRatedMoviesApi() {
-        return movieCallInterface.getTopRatedMovies(
-                getResources().getString(R.string.api_key),
-                getResources().getString(R.string.language_en_US),
-                currentPage
-        );
-    }
-
-    private Call<MovieGenres> callMovieGenres() {
-        return movieCallInterface.getMovieGenres(
-                getResources().getString(R.string.api_key),
-                getResources().getString(R.string.language_en_US)
-        );
-    }
+    private PaginationAdapter.OnItemClickListener onItemClickListener = new PaginationAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int itemId) {
+            try {
+                Fragment movieFragment = MovieFragment.getInstance(itemId);
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.grid_movies_fragment_container, movieFragment)
+                        .addToBackStack(null).commit();
+            } catch (Exception ignored){
+            }
+        }
+    };
 }

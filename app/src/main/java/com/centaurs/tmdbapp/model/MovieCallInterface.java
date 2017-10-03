@@ -8,7 +8,7 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
-public interface MovieCallInterface {
+interface MovieCallInterface {
     String API_KEY_QUERY = "api_key";
     String LANGUAGE_KEY = "language";
     String PAGE_QUERY = "page";

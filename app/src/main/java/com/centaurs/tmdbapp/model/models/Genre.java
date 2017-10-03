@@ -1,16 +1,9 @@
 
 package com.centaurs.tmdbapp.model.models;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 public class Genre {
 
-    @SerializedName("id")
-    @Expose
     private Integer id;
-    @SerializedName("name")
-    @Expose
     private String name;
 
     public Integer getId() {
@@ -28,5 +21,4 @@ public class Genre {
     public void setName(String name) {
         this.name = name;
     }
-
 }

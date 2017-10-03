@@ -6,5 +6,5 @@ public class Constants {
     public final static int[] GET_DATE_INDEXES_ARR = new int[]{0, 4};
     public final static String WORDS_DIVIDER = ", ";
     public final static String EMPTY_STRING = "";
-    public final static int[] BIG_POSTER_SIZE_W_H = new int[]{400, 600};
+    public final static int DIFFERENCE_BETWEEN_SCREEN_AND_POSTER_SIZE_PERCENT = 15;
 }

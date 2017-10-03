@@ -1,13 +1,13 @@
-package com.centaurs.tmdbapp.presenter.pagination;
+package com.centaurs.tmdbapp.view;
 
 
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-public abstract class PaginationScrollListener extends RecyclerView.OnScrollListener{
-    GridLayoutManager layoutManager;
+abstract class PaginationScrollListener extends RecyclerView.OnScrollListener{
+    private GridLayoutManager layoutManager;
 
-    public PaginationScrollListener(GridLayoutManager layoutManager) {
+    PaginationScrollListener(GridLayoutManager layoutManager) {
         this.layoutManager = layoutManager;
     }
 

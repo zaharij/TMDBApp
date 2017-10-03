@@ -1,6 +1,9 @@
 package com.centaurs.tmdbapp.view;
 
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,13 +15,32 @@ import android.widget.TextView;
 
 import com.centaurs.tmdbapp.R;
 
+import java.io.Serializable;
+
 public class ConnectionTroublesFragment extends Fragment{
-    private TextView connectionMessageTextView;
-    private Button retrytButton;
+    private static String NEXT_FRAGMENT_ARGS = "nextFragment";
+    private OnRetryClickListener onRetryClickListener;
+
+    interface OnRetryClickListener extends Serializable{
+        void onRetryClick();
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        onRetryClickListener = (OnRetryClickListener) getArguments().getSerializable(NEXT_FRAGMENT_ARGS);
+    }
+
+    public static ConnectionTroublesFragment getInstanceIfNoNetwork(Context context
+            , OnRetryClickListener onRetryClickListener){
+        if (!ConnectionTroublesFragment.checkNetworkForResult(context)){
+            ConnectionTroublesFragment connectionTroublesFragment = new ConnectionTroublesFragment();
+            Bundle args = new Bundle();
+            args.putSerializable(NEXT_FRAGMENT_ARGS, onRetryClickListener);
+            connectionTroublesFragment.setArguments(args);
+            return connectionTroublesFragment;
+        }
+        return null;
     }
 
     @Nullable
@@ -26,20 +48,24 @@ public class ConnectionTroublesFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_connection_troubles, container, false);
 
-        connectionMessageTextView = (TextView) view.findViewById(R.id.no_connection_textView);
-        connectionMessageTextView.setText(getResources().getString(R.string.no_connection_mess));
+        TextView connectionMessageTextView = view.findViewById(R.id.no_connection_textView);
+        connectionMessageTextView.setText(getString(R.string.no_connection_mess));
 
-        retrytButton = (Button) view.findViewById(R.id.retry_connection_button);
-        retrytButton.setText(getResources().getString(R.string.restart_button_str));
-        retrytButton.setOnClickListener(new View.OnClickListener() {
+        Button retryButton = view.findViewById(R.id.retry_connection_button);
+        retryButton.setText(getString(R.string.restart_button_str));
+        retryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MoviesActivity) getActivity()).getSupportFragmentManager().beginTransaction()
-                        .remove(ConnectionTroublesFragment.this).commit();
-                ((MoviesActivity) getActivity()).startMoviesFragment();
-                ((MoviesActivity) getActivity()).startCheckingNetwork();
+                onRetryClickListener.onRetryClick();
             }
         });
         return view;
+    }
+
+    private static boolean checkNetworkForResult(Context context){
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

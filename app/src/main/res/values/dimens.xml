@@ -13,5 +13,6 @@
     <dimen name="poster_img_heig">280dp</dimen>
     <dimen name="single_poster_height">500dp</dimen>
     <dimen name="profile_height">100dp</dimen>
-
+    <dimen name="big_poster_size_width">400dp</dimen>
+    <dimen name="big_poster_size_height">600dp</dimen>
 </resources>
