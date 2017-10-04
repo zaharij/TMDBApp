@@ -1,4 +1,4 @@
-package com.centaurs.tmdbapp.view;
+package com.centaurs.tmdbapp.presenter.pclasses;
 
 
 import android.support.v7.widget.GridLayoutManager;

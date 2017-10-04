@@ -1,5 +1,4 @@
-package com.centaurs.tmdbapp.presenter.pagination;
-
+package com.centaurs.tmdbapp.model;
 
 import com.centaurs.tmdbapp.model.models.MovieGenres;
 import com.centaurs.tmdbapp.model.models.Result;
@@ -7,20 +6,20 @@ import com.centaurs.tmdbapp.model.models.Result;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MovieResultsSingletone {
-    private static MovieResultsSingletone movieResultsSingletone;
+public class MovieResultsSingleton {
+    private static MovieResultsSingleton movieResultsSingleton;
     private List<Result> movieResults;
     private MovieGenres movieGenres;
 
-    private MovieResultsSingletone(){
+    private MovieResultsSingleton(){
         movieResults = new ArrayList<>();
     }
 
-    public static MovieResultsSingletone getMovieResultsSingletone(){
-        if (movieResultsSingletone == null){
-            movieResultsSingletone = new MovieResultsSingletone();
+    public static MovieResultsSingleton getMovieResultsSingleton(){
+        if (movieResultsSingleton == null){
+            movieResultsSingleton = new MovieResultsSingleton();
         }
-        return movieResultsSingletone;
+        return movieResultsSingleton;
     }
 
     public List<Result> getMovieResults() {

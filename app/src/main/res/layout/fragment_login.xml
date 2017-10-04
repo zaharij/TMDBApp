@@ -23,6 +23,7 @@
         android:layout_marginRight="@dimen/activity_margin"
         android:layout_marginTop="@dimen/paddingItemDecorationEdge"
         android:gravity="center"
+        android:text="@string/username_default_str"
         android:textColor="@android:color/white"/>
 
     <Button

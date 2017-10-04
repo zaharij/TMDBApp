@@ -11,6 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/activity_margin"
+        android:gravity="center"
+        android:text="@string/no_connection_mess"
         android:textColor="@color/cardview_light_background"
         android:textSize="18sp"/>
 
@@ -21,5 +23,6 @@
         android:layout_margin="@dimen/activity_margin"
         android:background="@color/colorPrimary"
         android:backgroundTint="@color/colorPrimary"
+        android:text="@string/restart_button_str"
         android:textColor="@color/cardview_light_background"/>
 </LinearLayout>
