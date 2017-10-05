@@ -12,7 +12,7 @@ import com.centaurs.tmdbapp.view.vinterfaces.ViewInterface;
 public class ConnectionTroublesPresenter implements ConnectionTroublesPresenterInterface {
     private Context context;
 
-    private ConnectionTroublesPresenter(Context context){
+    ConnectionTroublesPresenter(Context context){
         this.context = context;
     }
 

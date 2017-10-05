@@ -2,6 +2,7 @@ package com.centaurs.tmdbapp.presenter.pclasses;
 
 
 import android.graphics.Point;
+import android.support.v4.app.FragmentActivity;
 import android.view.Display;
 import android.view.View;
 
@@ -19,9 +20,10 @@ import com.centaurs.tmdbapp.view.vinterfaces.ViewInterface;
 
 import java.util.List;
 
-import static com.centaurs.tmdbapp.model.constants.Constants.DIFFERENCE_BETWEEN_SCREEN_AND_POSTER_SIZE_PERCENT;
+import static com.centaurs.tmdbapp.model.constants.Constants.DIFFERENCE_BETWEEN_SCREEN_AND_POSTER_PORTRET_SIZE_PERCENT;
 import static com.centaurs.tmdbapp.model.constants.Constants.EMPTY_STRING;
 import static com.centaurs.tmdbapp.model.constants.Constants.GET_DATE_INDEXES_ARR;
+import static com.centaurs.tmdbapp.model.constants.Constants.IF_LANDSCAPE_POSTER_HEIGHT_INCREASE_VALUE;
 import static com.centaurs.tmdbapp.model.constants.Constants.VERTICAL_DIVIDER;
 import static com.centaurs.tmdbapp.model.constants.Constants.WORDS_DIVIDER;
 import static com.centaurs.tmdbapp.model.constants.QueryConstants.DEFAULT_IMAGE_SIZE_W;
@@ -31,14 +33,16 @@ public class MoviePresenter implements MoviePresenterInterface {
     private MovieViewInterface movieViewInterface;
     private MovieResultsSingleton movieResultsSingleton;
     private int movieId;
+    private FragmentActivity fragmentActivity;
 
-    private MoviePresenter(int movieId){
+    private MoviePresenter(FragmentActivity fragmentActivity, int movieId){
+        this.fragmentActivity = fragmentActivity;
         this.movieId = movieId;
         movieResultsSingleton = MovieResultsSingleton.getMovieResultsSingleton();
     }
 
-    public static MoviePresenterInterface getMoviePresenterInterface(int movieId){
-        return new MoviePresenter(movieId);
+    public static MoviePresenterInterface getMoviePresenterInterface(FragmentActivity fragmentActivity, int movieId){
+        return new MoviePresenter(fragmentActivity, movieId);
     }
 
     @Override
@@ -57,22 +61,36 @@ public class MoviePresenter implements MoviePresenterInterface {
 
     @Override
     public void setTextContent(){
-        movieViewInterface.setTitle(movieResultsSingleton.getMovieResults().get(movieId).getTitle());
-        movieViewInterface.setAdditionalInfoYearLanguageStr(movieResultsSingleton.getMovieResults().get(movieId).getReleaseDate()
-                .substring(GET_DATE_INDEXES_ARR[0], GET_DATE_INDEXES_ARR[1]).concat(VERTICAL_DIVIDER)
-                .concat(movieResultsSingleton.getMovieResults().get(movieId).getOriginalLanguage().toUpperCase()));
-        movieViewInterface.setGenres(movieViewInterface.getActivityForOuterCall().getString(R.string.genre).concat(getGenres()));
-        movieViewInterface.setOverview(movieResultsSingleton.getMovieResults().get(movieId).getOverview());
+        try{
+            movieViewInterface.setTitle(movieResultsSingleton.getMovieResults().get(movieId).getTitle());
+        }catch (Exception ignored){}
+        try{
+            movieViewInterface.setAdditionalInfoYearLanguageStr(movieResultsSingleton.getMovieResults().get(movieId).getReleaseDate()
+                    .substring(GET_DATE_INDEXES_ARR[0], GET_DATE_INDEXES_ARR[1]).concat(VERTICAL_DIVIDER)
+                    .concat(movieResultsSingleton.getMovieResults().get(movieId).getOriginalLanguage().toUpperCase()));
+        }catch (Exception ignored){}
+        try{
+            movieViewInterface.setGenres(fragmentActivity.getString(R.string.genre).concat(getGenres()));
+        }catch (Exception ignored){}
+        try{
+            movieViewInterface.setOverview(movieResultsSingleton.getMovieResults().get(movieId).getOverview());
+        }catch (Exception ignored){}
     }
 
     @Override
     public void setPoster() {
-        Display display = movieViewInterface.getActivityForOuterCall().getWindowManager().getDefaultDisplay();
+        Display display = fragmentActivity.getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
         int width = size.x;
-        int height = size.y - (size.y * DIFFERENCE_BETWEEN_SCREEN_AND_POSTER_SIZE_PERCENT) / 100;
-        Glide.with(movieViewInterface.getActivityForOuterCall()).load(getBaseImageUrlStrByWidth(DEFAULT_IMAGE_SIZE_W)
+        int height;
+        if (size.x < size.y){
+           height = size.y - (size.y * DIFFERENCE_BETWEEN_SCREEN_AND_POSTER_PORTRET_SIZE_PERCENT) / 100;
+        } else {
+            height = size.y * IF_LANDSCAPE_POSTER_HEIGHT_INCREASE_VALUE;
+        }
+
+        Glide.with(fragmentActivity).load(getBaseImageUrlStrByWidth(DEFAULT_IMAGE_SIZE_W)
                 + movieResultsSingleton.getMovieResults().get(movieId).getPosterPath())
                 .listener(new RequestListener<String, GlideDrawable>() {
                     @Override
@@ -87,6 +105,11 @@ public class MoviePresenter implements MoviePresenterInterface {
                     }
                 }).diskCacheStrategy(DiskCacheStrategy.ALL).centerCrop().crossFade()
                 .override(width, height).into(movieViewInterface.getPosterImageView());
+    }
+
+    @Override
+    public void refreshActivity(FragmentActivity fragmentActivity) {
+        this.fragmentActivity = fragmentActivity;
     }
 
     private String getGenres(){

@@ -3,7 +3,6 @@ package com.centaurs.tmdbapp.view;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,8 +22,14 @@ public class MoviesGridFragment extends Fragment implements MoviesGridViewInterf
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        moviesGridPresenterInterface = MoviesGridPresenter.getMoviesGridPresenterInterface(getActivity()
-                , onItemClickListener, R.layout.item_list);
+        this.setRetainInstance(true);
+        if (savedInstanceState == null) {
+            moviesGridPresenterInterface = MoviesGridPresenter.getMoviesGridPresenterInterface(getActivity()
+                    , onItemClickListener, R.layout.item_list, R.layout.item_progress);
+        } else {
+            moviesGridPresenterInterface = (MoviesGridPresenterInterface)
+                    PresenterManager.getInstance().restorePresenter(savedInstanceState);
+        }
     }
 
     @Nullable
@@ -34,7 +39,8 @@ public class MoviesGridFragment extends Fragment implements MoviesGridViewInterf
         progressBar = view.findViewById(R.id.main_progress);
         RecyclerView recyclerView = view.findViewById(R.id.main_recycler);
         moviesGridPresenterInterface.attachView(this);
-        moviesGridPresenterInterface.setRecyclerView(recyclerView, getActivity());
+        moviesGridPresenterInterface.refreshActivity(getActivity());
+        moviesGridPresenterInterface.setRecyclerView(recyclerView);
         moviesGridPresenterInterface.setMainProgressVisibility();
         return view;
     }
@@ -43,6 +49,12 @@ public class MoviesGridFragment extends Fragment implements MoviesGridViewInterf
     public void onDestroyView() {
         super.onDestroyView();
         moviesGridPresenterInterface.detachView();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        PresenterManager.getInstance().savePresenter(moviesGridPresenterInterface, outState);
     }
 
     @Override
@@ -59,6 +71,11 @@ public class MoviesGridFragment extends Fragment implements MoviesGridViewInterf
         return new MovieViewHolder(view);
     }
 
+    @Override
+    public LoadingViewHolder getLoadingViewHolder(View view) {
+        return new LoadingViewHolder(view);
+    }
+
     private PaginationAdapter.OnItemClickListener onItemClickListener = new PaginationAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int itemId) {
@@ -67,13 +84,7 @@ public class MoviesGridFragment extends Fragment implements MoviesGridViewInterf
                 getActivity().getSupportFragmentManager().beginTransaction()
                         .replace(R.id.grid_movies_fragment_container, movieFragment)
                         .addToBackStack(null).commit();
-            } catch (Exception ignored){
-            }
+            } catch (Exception ignored){}
         }
     };
-
-    @Override
-    public FragmentActivity getActivityForOuterCall() {
-        return getActivity();
-    }
 }

@@ -5,7 +5,7 @@ import android.view.View;
 
 import com.centaurs.tmdbapp.view.vinterfaces.ViewInterface;
 
-interface PresenterInterface {
+public interface PresenterInterface {
     void attachView(ViewInterface viewInterface);
     void detachView();
     void onClickButton(View view);

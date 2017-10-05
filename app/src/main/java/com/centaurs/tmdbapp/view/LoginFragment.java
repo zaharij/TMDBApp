@@ -5,23 +5,20 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.presenter.pclasses.LoginPresenter;
 import com.centaurs.tmdbapp.presenter.pinterfaces.LoginPresenterInterface;
 import com.centaurs.tmdbapp.view.vinterfaces.LoginViewInterface;
 
-import dmax.dialog.SpotsDialog;
-
 public class LoginFragment extends Fragment implements LoginViewInterface {
-    private SpotsDialog dialog;
     private ImageView profileImageView;
     private TextView userNameTextView;
     private Button accountButton, signOutButton;
@@ -30,7 +27,12 @@ public class LoginFragment extends Fragment implements LoginViewInterface {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        loginPresenterInterface = LoginPresenter.getLoginPresenterInterface(getActivity());
+        setRetainInstance(true);
+        if (savedInstanceState == null) {
+            loginPresenterInterface = LoginPresenter.getLoginPresenterInterface(getActivity());
+        } else {
+            loginPresenterInterface = (LoginPresenterInterface) PresenterManager.getInstance().restorePresenter(savedInstanceState);
+        }
     }
 
     @Override
@@ -52,6 +54,7 @@ public class LoginFragment extends Fragment implements LoginViewInterface {
         accountButton = view.findViewById(R.id.account_button);
         accountButton.setOnClickListener(onClickListener);
         loginPresenterInterface.attachView(this);
+        loginPresenterInterface.refreshActivity(getActivity());
         return view;
     }
 
@@ -59,6 +62,12 @@ public class LoginFragment extends Fragment implements LoginViewInterface {
     public void onDestroyView() {
         super.onDestroyView();
         loginPresenterInterface.detachView();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        PresenterManager.getInstance().savePresenter(loginPresenterInterface, outState);
     }
 
     private View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -88,19 +97,13 @@ public class LoginFragment extends Fragment implements LoginViewInterface {
     }
 
     @Override
-    public void showProgressDialog() {
-        dialog = new SpotsDialog(getActivity());
-        dialog.show();
-    }
-
-    @Override
-    public void hideProgressDialog() {
-        dialog.dismiss();
-    }
-
-    @Override
     public void startActivityForResultOuterCall(Intent intent, int requestCode) {
         startActivityForResult(intent, requestCode);
+    }
+
+    @Override
+    public void toastMessage(int strId) {
+        Toast.makeText(getContext(), strId, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -121,10 +124,5 @@ public class LoginFragment extends Fragment implements LoginViewInterface {
     @Override
     public void setStatusProfile(String strStatus) {
         userNameTextView.setText(strStatus);
-    }
-
-    @Override
-    public FragmentActivity getActivityForOuterCall() {
-        return getActivity();
     }
 }

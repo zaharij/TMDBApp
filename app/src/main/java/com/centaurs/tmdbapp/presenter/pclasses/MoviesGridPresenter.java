@@ -38,13 +38,15 @@ public class MoviesGridPresenter implements MoviesGridPresenterInterface {
     private int currentPage = PAGE_START;
     private boolean isMainProgressVisible = false;
     private MovieResultsSingleton movieResultsSingleton;
+    private FragmentActivity fragmentActivity;
 
-    private MoviesGridPresenter(FragmentActivity activity, PaginationAdapter.OnItemClickListener onItemClickListener, int itemViewRes){
+    private MoviesGridPresenter(FragmentActivity activity, PaginationAdapter.OnItemClickListener onItemClickListener, int itemViewRes, int loadingItemRes){
         movieCall = MovieCall.getInstance();
+        this.fragmentActivity = activity;
         isMainProgressVisible = true;
         movieResultsSingleton = MovieResultsSingleton.getMovieResultsSingleton();
-        paginationAdapter = new PaginationAdapter(activity, movieResultsSingleton, onItemClickListener, itemViewRes);
-        loadFirstPage(activity);
+        paginationAdapter = new PaginationAdapter(activity, movieResultsSingleton, onItemClickListener, itemViewRes, loadingItemRes);
+        loadFirstPage();
         movieCall.callMovieGenres(activity).enqueue(new Callback<MovieGenres>() {
             @Override
             public void onResponse(@NotNull Call<MovieGenres> call, @NotNull Response<MovieGenres> response) {
@@ -57,8 +59,8 @@ public class MoviesGridPresenter implements MoviesGridPresenterInterface {
     }
 
     public static MoviesGridPresenterInterface getMoviesGridPresenterInterface(FragmentActivity activity
-            , PaginationAdapter.OnItemClickListener onItemClickListener, int itemViewRes){
-        return new MoviesGridPresenter(activity, onItemClickListener, itemViewRes);
+            , PaginationAdapter.OnItemClickListener onItemClickListener, int itemViewRes, int loadingItemRes){
+        return new MoviesGridPresenter(activity, onItemClickListener, itemViewRes, loadingItemRes);
     }
 
     @Override
@@ -79,7 +81,8 @@ public class MoviesGridPresenter implements MoviesGridPresenterInterface {
     }
 
     @Override
-    public void loadFirstPage(FragmentActivity fragmentActivity) {
+    public void loadFirstPage() {
+        paginationAdapter.refreshContext(fragmentActivity);
         movieCall.callTopRatedMoviesApi(fragmentActivity, currentPage).enqueue(new Callback<TopRatedMovies>() {
             @Override
             public void onResponse(@NotNull Call<TopRatedMovies> call, @NotNull Response<TopRatedMovies> response) {
@@ -97,7 +100,7 @@ public class MoviesGridPresenter implements MoviesGridPresenterInterface {
     }
 
     @Override
-    public void loadNextPage(FragmentActivity fragmentActivity) {
+    public void loadNextPage() {
         movieCall.callTopRatedMoviesApi(fragmentActivity, currentPage).enqueue(new Callback<TopRatedMovies>() {
             @Override
             public void onResponse(@NotNull Call<TopRatedMovies> call, @NotNull Response<TopRatedMovies> response) {
@@ -116,7 +119,7 @@ public class MoviesGridPresenter implements MoviesGridPresenterInterface {
     }
 
     @Override
-    public void setRecyclerView(RecyclerView recyclerView, final FragmentActivity fragmentActivity) {
+    public void setRecyclerView(RecyclerView recyclerView) {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(fragmentActivity, GRID_COLUMNS_NUMBER);
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -130,7 +133,7 @@ public class MoviesGridPresenter implements MoviesGridPresenterInterface {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        loadNextPage(fragmentActivity);
+                        loadNextPage();
                     }
                 }, SCROLLING_DURATION);
             }
@@ -155,6 +158,12 @@ public class MoviesGridPresenter implements MoviesGridPresenterInterface {
     @Override
     public void setMainProgressVisibility() {
         moviesGridViewInterface.setMainProgressVisibility(isMainProgressVisible);
+    }
+
+    @Override
+    public void refreshActivity(FragmentActivity fragmentActivity) {
+        this.fragmentActivity = fragmentActivity;
+        paginationAdapter.refreshContext(fragmentActivity);
     }
 
     private List<Result> fetchResults(Response<TopRatedMovies> response) {

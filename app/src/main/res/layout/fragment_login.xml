@@ -18,7 +18,7 @@
         android:id="@+id/username_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/profile_height"
+        android:layout_marginBottom="@dimen/paddingItemDecorationEdge"
         android:layout_marginLeft="@dimen/activity_margin"
         android:layout_marginRight="@dimen/activity_margin"
         android:layout_marginTop="@dimen/paddingItemDecorationEdge"
@@ -51,6 +51,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/sign_out"
-        android:visibility="visible"
+        android:visibility="gone"
         tools:visibility="gone"/>
 </LinearLayout>

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +22,7 @@ public class ConnectionTroublesFragment extends Fragment{
     private OnRetryClickListener onRetryClickListener;
 
     public interface OnRetryClickListener extends Serializable{
-        void onRetryClick();
+        void onRetryClick(FragmentActivity fragmentActivity);
     }
 
     public static ConnectionTroublesFragment getInstanceIfNoNetwork(Context context
@@ -53,7 +54,7 @@ public class ConnectionTroublesFragment extends Fragment{
         retryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onRetryClickListener.onRetryClick();
+                onRetryClickListener.onRetryClick(getActivity());
             }
         });
         return view;

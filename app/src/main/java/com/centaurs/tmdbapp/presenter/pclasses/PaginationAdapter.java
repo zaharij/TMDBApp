@@ -33,6 +33,7 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private MovieResultsSingleton movieResultsSingleton;
     private PaginationAdapter.OnItemClickListener onItemClickListener;
     private int itemViewRes;
+    private int loadingItemRes;
 
     public interface OnItemClickListener{
         void onItemClick(int itemId);
@@ -41,7 +42,8 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private boolean isLoadingAdded = false;
 
     PaginationAdapter(Context context, MovieResultsSingleton movieResultsSingleton
-            , PaginationAdapter.OnItemClickListener onItemClickListener, int itemViewRes) {
+            , PaginationAdapter.OnItemClickListener onItemClickListener, int itemViewRes, int loadingItemRes) {
+        this.loadingItemRes = loadingItemRes;
         this.itemViewRes = itemViewRes;
         this.onItemClickListener = onItemClickListener;
         this.context = context;
@@ -65,11 +67,15 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 viewHolder = getViewHolder(parent, inflater);
                 break;
             case LOADING:
-                View view = inflater.inflate(R.layout.item_progress, parent, false);
-                viewHolder = new LoadingViewHolder(view);
+                View view = inflater.inflate(loadingItemRes, parent, false);
+                viewHolder = moviesGridViewInterface.getLoadingViewHolder(view);
                 break;
         }
         return viewHolder;
+    }
+
+    void refreshContext(Context context){
+        this.context = context;
     }
 
     @NonNull
@@ -166,12 +172,5 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     private Result getItem(int position) {
         return movieResultsSingleton.getMovieResults().get(position);
-    }
-
-    private class LoadingViewHolder extends RecyclerView.ViewHolder{
-
-        private LoadingViewHolder(View itemView) {
-            super(itemView);
-        }
     }
 }

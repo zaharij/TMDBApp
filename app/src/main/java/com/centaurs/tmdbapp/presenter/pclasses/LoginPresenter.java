@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
@@ -34,8 +35,13 @@ public class LoginPresenter implements LoginPresenterInterface, GoogleApiClient.
     private int RC_SIGN_IN = 0;
     private LoginViewInterface loginViewInterface;
     private GoogleApiClient mGoogleApiClient;
-
+    private FragmentActivity fragmentActivity;
     private LoginPresenter(FragmentActivity fragmentActivity){
+        this.fragmentActivity = fragmentActivity;
+        initGoogleApiClient();
+    }
+
+    private void initGoogleApiClient(){
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -66,24 +72,54 @@ public class LoginPresenter implements LoginPresenterInterface, GoogleApiClient.
                 checkNetworkIfTrueOpenMovies();
                 break;
             case R.id.account_button:
+                ConnectionTroublesPresenter connectionTroublesPresenter = new ConnectionTroublesPresenter(fragmentActivity);
+                if(!connectionTroublesPresenter.connectionCheckRequestForResult()){
+                    loginViewInterface.toastMessage(R.string.no_connection_mess);
+
+                }
                 Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
                 loginViewInterface.startActivityForResultOuterCall(signInIntent, RC_SIGN_IN);
                 break;
             case R.id.sign_out_button:
-                Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                        new ResultCallback<Status>() {
-                            @Override
-                            public void onResult(@NonNull Status status) {
-                                loginViewInterface.updateUISignedInOrOutBooll(false);
+                if (!mGoogleApiClient.isConnected()){
+                    mGoogleApiClient.connect();
+                    final Handler handler = new Handler();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            while(mGoogleApiClient.isConnecting()){
+                                if (mGoogleApiClient.isConnected()){
+                                    break;
+                                }
                             }
-                        });
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    signOut();
+                                }
+                            });
+                        }
+                    }).start();
+                } else {
+                    signOut();
+                }
                 break;
         }
     }
 
+    private void signOut() {
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(@NonNull Status status) {
+                        loginViewInterface.updateUISignedInOrOutBooll(false);
+                    }
+                });
+    }
+
     private void checkNetworkIfTrueOpenMovies() {
         if (checkConnectionIfFalseGoToFragment()){
-            loginViewInterface.getActivityForOuterCall().getSupportFragmentManager().beginTransaction()
+            fragmentActivity.getSupportFragmentManager().beginTransaction()
                     .add(R.id.grid_movies_fragment_container, new MoviesGridFragment())
                     .addToBackStack(null).commit();
         }
@@ -91,10 +127,10 @@ public class LoginPresenter implements LoginPresenterInterface, GoogleApiClient.
 
     private boolean checkConnectionIfFalseGoToFragment() {
         ConnectionTroublesFragment connectionTroublesFragment
-                = ConnectionTroublesFragment.getInstanceIfNoNetwork(loginViewInterface.getActivityForOuterCall()
+                = ConnectionTroublesFragment.getInstanceIfNoNetwork(fragmentActivity
                 , onRetryClickListener);
         if (connectionTroublesFragment != null){
-            loginViewInterface.getActivityForOuterCall().getSupportFragmentManager().beginTransaction()
+            fragmentActivity.getSupportFragmentManager().beginTransaction()
                     .add(R.id.grid_movies_fragment_container, connectionTroublesFragment)
                     .disallowAddToBackStack().commit();
             return false;
@@ -119,7 +155,8 @@ public class LoginPresenter implements LoginPresenterInterface, GoogleApiClient.
     private ConnectionTroublesFragment.OnRetryClickListener onRetryClickListener
             = new ConnectionTroublesFragment.OnRetryClickListener() {
         @Override
-        public void onRetryClick() {
+        public void onRetryClick(FragmentActivity activity) {
+            fragmentActivity = activity;
             checkNetworkIfTrueOpenMovies();
         }
     };
@@ -131,11 +168,9 @@ public class LoginPresenter implements LoginPresenterInterface, GoogleApiClient.
             GoogleSignInResult result = opr.get();
             handleSignInResult(result);
         } else {
-            loginViewInterface.showProgressDialog();
             opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                 @Override
                 public void onResult(@NonNull GoogleSignInResult googleSignInResult) {
-                    loginViewInterface.hideProgressDialog();
                     handleSignInResult(googleSignInResult);
                 }
             });
@@ -148,6 +183,11 @@ public class LoginPresenter implements LoginPresenterInterface, GoogleApiClient.
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             handleSignInResult(result);
         }
+    }
+
+    @Override
+    public void refreshActivity(FragmentActivity fragmentActivity) {
+        this.fragmentActivity = fragmentActivity;
     }
 
     @Override

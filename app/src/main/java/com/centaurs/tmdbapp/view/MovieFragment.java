@@ -3,7 +3,6 @@ package com.centaurs.tmdbapp.view;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +31,13 @@ public class MovieFragment extends Fragment implements MovieViewInterface{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        moviePresenterInterface = MoviePresenter.getMoviePresenterInterface(getArguments().getInt(MOVIE_ID_ARG));
+        if (savedInstanceState == null) {
+            moviePresenterInterface = MoviePresenter.getMoviePresenterInterface(getActivity()
+                    , getArguments().getInt(MOVIE_ID_ARG));
+        } else {
+            moviePresenterInterface = (MoviePresenterInterface)
+                    PresenterManager.getInstance().restorePresenter(savedInstanceState);
+        }
     }
 
     @Nullable
@@ -45,6 +50,7 @@ public class MovieFragment extends Fragment implements MovieViewInterface{
         overviewTextView = view.findViewById(R.id.single_movie_overview_textView);
         posterImageView = view.findViewById(R.id.poster_single_imageView);
         moviePresenterInterface.attachView(this);
+        moviePresenterInterface.refreshActivity(getActivity());
         moviePresenterInterface.setTextContent();
         moviePresenterInterface.setPoster();
         return view;
@@ -54,6 +60,12 @@ public class MovieFragment extends Fragment implements MovieViewInterface{
     public void onDestroyView() {
         super.onDestroyView();
         moviePresenterInterface.detachView();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        PresenterManager.getInstance().savePresenter(moviePresenterInterface, outState);
     }
 
     @Override
@@ -79,10 +91,5 @@ public class MovieFragment extends Fragment implements MovieViewInterface{
     @Override
     public ImageView getPosterImageView() {
         return posterImageView;
-    }
-
-    @Override
-    public FragmentActivity getActivityForOuterCall() {
-        return getActivity();
     }
 }

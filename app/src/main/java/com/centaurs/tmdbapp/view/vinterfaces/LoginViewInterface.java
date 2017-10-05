@@ -10,8 +10,7 @@ public interface LoginViewInterface extends ViewInterface {
     void setStatusProfile(int strId);
     void setStatusProfile(String strStatus);
     void updateUISignedInOrOutBooll(boolean signedIn);
-    void showProgressDialog();
-    void hideProgressDialog();
     void startActivityForResultOuterCall(Intent intent, int requestCode);
+    void toastMessage(int strId);
 }
 
