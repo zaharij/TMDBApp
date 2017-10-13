@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/app_background"
+              android:gravity="center"
+              android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/profile_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/profile_height"
+        android:contentDescription="@string/profile_image_content_description"
+        app:srcCompat="@drawable/profile_image_default"/>
+
+    <TextView
+        android:id="@+id/username_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/profile_status_margin"
+        android:gravity="center"
+        android:text="@string/profile_status_default"
+        android:textColor="@color/user_status"
+        android:textSize="@dimen/profile_status_text_size"/>
+
+    <Button
+        android:id="@+id/movies_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/login_page_button_margin"
+        android:background="@color/colorPrimary"
+        android:text="@string/movies_button"
+        android:textColor="@color/button_text"
+        android:textSize="@dimen/button_text_size"/>
+
+    <Button
+        android:id="@+id/sign_in_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/login_page_button_margin"
+        android:background="@color/colorPrimary"
+        android:drawableStart="@drawable/ic_google"
+        android:paddingEnd="@dimen/sign_in_button_padding"
+        android:paddingStart="@dimen/sign_in_button_padding"
+        android:text="@string/account_button"
+        android:textColor="@color/button_text"
+        android:textSize="@dimen/button_text_size"/>
+
+    <Button
+        android:id="@+id/sign_out_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/login_page_button_margin"
+        android:text="@string/sign_out"
+        android:textColor="@color/button_text"
+        android:textSize="@dimen/button_text_size"
+        android:visibility="gone"
+        tools:visibility="gone"/>
+</LinearLayout>
