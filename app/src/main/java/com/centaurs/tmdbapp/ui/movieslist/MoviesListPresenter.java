@@ -24,6 +24,7 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
     private TMoviesDBApi tMoviesDBApi;
     private int currentPage = PAGE_START;
     private List<Result> movies;
+    private boolean isLoadingAdded = false;
 
     MoviesListPresenter (){
         tMoviesDBApi = TMoviesDBApi.getInstance();
@@ -45,7 +46,7 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
         public void onResponse(@NotNull Response<TopRatedMovies> response) {
             iView.hideMainProgress();
             onPutResultsToAdapter(response);
-            if (currentPage <= TOTAL_PAGES) iView.addLoadingFooter();
+            if (currentPage <= TOTAL_PAGES || currentPage > PAGE_START) addLoadingFooter();
             else isLastPage = true;
         }
     };
@@ -53,10 +54,10 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
     private TMoviesDBApi.IDataCallback loadNextPageCallback = new TMoviesDBApi.IDataCallback() {
         @Override
         public void onResponse(@NotNull Response<TopRatedMovies> response) {
-            iView.removeLoadingFooter();
+            removeLoadingFooter();
             isLoading = false;
             onPutResultsToAdapter(response);
-            if (currentPage != TOTAL_PAGES) iView.addLoadingFooter();
+            if (currentPage != TOTAL_PAGES) addLoadingFooter();
             else isLastPage = true;
         }
     };
@@ -77,11 +78,10 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
         } else {
             iView.goToNetworkConnectionTroublesFragment();
         }
-
     }
 
     @Override
-    public void onScrolledToEnd(Context context) {
+    public void onScrolledToEnd() {
         loadNextPage();
     }
 
@@ -101,7 +101,7 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
     @Override
     public void onPutResultsToAdapter(@NotNull Response<TopRatedMovies> response) {
         List<Result> results = fetchResults(response);
-        iView.putResultsToAdapter(results);
+        addAll(results);
     }
 
     @Override
@@ -127,6 +127,32 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
             return topRatedMovies.getResults();
         } else {
             return null;
+        }
+    }
+
+
+    private void add(Result r) {
+        movies.add(r);
+        iView.notifyItemInserted(isLoadingAdded, movies.size() - 1);
+    }
+
+    private void addAll(List<Result> moveResults) {
+        movies.addAll(moveResults);
+        iView.notifyItemInserted(isLoadingAdded, movies.size() - 1);
+    }
+
+    private void addLoadingFooter() {
+        isLoadingAdded = true;
+        add(new Result());
+    }
+
+    private void removeLoadingFooter() {
+        isLoadingAdded = false;
+        int position = movies.size() - 1;
+        Result result = movies.get(position);
+        if (result != null) {
+            movies.remove(position);
+            iView.notifyItemRemoved(isLoadingAdded, position);
         }
     }
 }

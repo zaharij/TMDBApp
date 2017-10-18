@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,11 +44,12 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
             presenter = new MoviesListPresenter();
+            Log.d("****************", "presenter is null");
         } else {
             presenter = (IMoviesListContract.IPresenter) PresenterManager.getInstance().restorePresenter(savedInstanceState);
-        }
+            }
         imageViewMap = new HashMap<>();
-        paginationAdapter = new PaginationAdapter(getActivity(), onItemClickListener, onNeedPosterListener, R.layout.item);
+        paginationAdapter = new PaginationAdapter(onItemClickListener, onNeedPosterListener, R.layout.item);
     }
 
     @Nullable
@@ -64,6 +66,7 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
         recyclerView.addOnScrollListener(new PaginationScrollListener(gridLayoutManager) {
             @Override
             void preLoadMoreItems() {
+                Log.d("***********************", "pre load more items _ " + totalPages + isLastPage + isLoading);
                 presenter.preLoadMoreItems();
             }
 
@@ -73,7 +76,7 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        presenter.onScrolledToEnd(getContext());
+                        presenter.onScrolledToEnd();
                     }
                 }, SCROLLING_DURATION);
             }
@@ -130,24 +133,10 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
         PresenterManager.getInstance().savePresenter(presenter, outState);
     }
 
-    @Override
-    public void putResultsToAdapter(List<Result> results) {
-        paginationAdapter.addAll(results);
-    }
 
     @Override
     public void hideMainProgress() {
         moviesListProgress.setVisibility(View.GONE);
-    }
-
-    @Override
-    public void addLoadingFooter() {
-        paginationAdapter.addLoadingFooter();
-    }
-
-    @Override
-    public void removeLoadingFooter() {
-        paginationAdapter.removeLoadingFooter();
     }
 
     @Override
@@ -190,6 +179,16 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     @Override
     public void setResultListToAdapter(List<Result> results) {
         paginationAdapter.setResults(results);
+    }
+
+    @Override
+    public void notifyItemInserted(boolean isLoadingAdded, int position) {
+        paginationAdapter.notifyInserted(isLoadingAdded, position);
+    }
+
+    @Override
+    public void notifyItemRemoved(boolean isLoadingAdded, int position) {
+        paginationAdapter.notifyRemoved(isLoadingAdded, position);
     }
 
     private NetworkConnectionTroublesFragment.OnRetryListener onRetryListener

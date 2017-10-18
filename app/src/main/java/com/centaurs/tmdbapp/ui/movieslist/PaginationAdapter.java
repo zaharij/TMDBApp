@@ -1,6 +1,5 @@
 package com.centaurs.tmdbapp.ui.movieslist;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,7 +21,6 @@ class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private static final int LOADING = 1;
     static final int ITEM_SPAN_SIZE = 2;
     private static final int LOADING_SPAN_SIZE = 1;
-    private Context context;
     private PaginationAdapter.OnItemClickListener onItemClickListener;
     private OnNeedPosterListener onNeedPosterListener;
     private int itemViewRes;
@@ -37,12 +35,11 @@ class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         void onNeedPoster(ImageView imageView, String posterPath);
     }
 
-    PaginationAdapter(Context context, PaginationAdapter.OnItemClickListener onItemClickListener
+    PaginationAdapter(PaginationAdapter.OnItemClickListener onItemClickListener
             , OnNeedPosterListener onNeedPosterListener, int itemViewRes) {
         this.onNeedPosterListener = onNeedPosterListener;
         this.itemViewRes = itemViewRes;
         this.onItemClickListener = onItemClickListener;
-        this.context = context;
     }
 
     void setResults(List<Result> results) {
@@ -93,8 +90,7 @@ class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                             .concat(VERTICAL_DIVIDER).concat(result.getOriginalLanguage().toUpperCase()));
                 }
                 if (result.getVoteAverage() != null){
-                    movieViewHolder.setRating(context.getString(R.string.rating)
-                            .concat(String.valueOf(result.getVoteAverage())));
+                    movieViewHolder.setRating(String.valueOf(result.getVoteAverage()));
                 }
                 onNeedPosterListener.onNeedPoster(movieViewHolder.getPosterImageView(), result.getPosterPath());
                 break;
@@ -126,28 +122,38 @@ class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 && isLoadingAdded) ? LOADING : ITEM;
     }
 
-    private void add(Result r) {
-        results.add(r);
-        notifyItemInserted(results.size() - 1);
+//    private void add(Result r) {
+//        results.add(r);
+//        notifyItemInserted(results.size() - 1);
+//    }
+//
+//    void addAll(List<Result> moveResults) {
+//        results.addAll(moveResults);
+//        notifyItemInserted(results.size() - 1);
+//    }
+//
+//    void addLoadingFooter() {
+//        isLoadingAdded = true;
+//        add(new Result());
+//    }
+//
+//    void removeLoadingFooter() {
+//        isLoadingAdded = false;
+//        int position = results.size() - 1;
+//        Result result = results.get(position);
+//        if (result != null) {
+//            results.remove(position);
+//            notifyItemRemoved(position);
+//        }
+//    }
+
+    void notifyInserted(boolean isLoadingAdded, int count){
+        this.isLoadingAdded = isLoadingAdded;
+        notifyItemInserted(count);
     }
 
-    void addAll(List<Result> moveResults) {
-        results.addAll(moveResults);
-        notifyItemInserted(results.size() - 1);
-    }
-
-    void addLoadingFooter() {
-        isLoadingAdded = true;
-        add(new Result());
-    }
-
-    void removeLoadingFooter() {
-        isLoadingAdded = false;
-        int position = results.size() - 1;
-        Result result = results.get(position);
-        if (result != null) {
-            results.remove(position);
-            notifyItemRemoved(position);
-        }
+    void notifyRemoved(boolean isLoadingAdded, int position){
+        this.isLoadingAdded = isLoadingAdded;
+        notifyItemRemoved(position);
     }
 }

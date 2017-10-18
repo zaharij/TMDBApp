@@ -24,7 +24,7 @@ import static com.centaurs.tmdbapp.data.constants.Constants.LANGUAGE_EN;
 import static com.centaurs.tmdbapp.data.constants.QueryConstants.DEFAULT_IMAGE_SIZE_W;
 import static com.centaurs.tmdbapp.data.constants.QueryConstants.getBaseImageUrlStrByWidth;
 
-public class TMoviesDBApi {
+public class TMoviesDBApi{
     private static TMoviesDBApi tMoviesDBApi;
     private ITMoviesDBApi ITMoviesDBApi;
     private MovieGenres movieGenres;
@@ -88,25 +88,27 @@ public class TMoviesDBApi {
 
     public void loadImage(final Context context, boolean isPoster, final boolean isRound
             , final String imagePath, final IPosterLoadingCallback iPosterLoadingCallback){
-        String currentImagePath;
-        if (isPoster){
-            currentImagePath = getBaseImageUrlStrByWidth(DEFAULT_IMAGE_SIZE_W).concat(imagePath);
-        } else {
-            currentImagePath = imagePath;
-        }
-        Glide.with(context)
-                .load(currentImagePath)
-                .asBitmap()
-                .into(new SimpleTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                        RoundedBitmapDrawable circularBitmapDrawable =
-                                RoundedBitmapDrawableFactory.create(context.getResources(), resource);
-                        if (isRound){
-                            circularBitmapDrawable.setCircular(true);
+        if (context != null && imagePath != null){
+            String currentImagePath;
+            if (isPoster){
+                currentImagePath = getBaseImageUrlStrByWidth(DEFAULT_IMAGE_SIZE_W).concat(imagePath);
+            } else {
+                currentImagePath = imagePath;
+            }
+            Glide.with(context)
+                    .load(currentImagePath)
+                    .asBitmap()
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                            RoundedBitmapDrawable circularBitmapDrawable =
+                                    RoundedBitmapDrawableFactory.create(context.getResources(), resource);
+                            if (isRound){
+                                circularBitmapDrawable.setCircular(true);
+                            }
+                            iPosterLoadingCallback.onBitmapGet(imagePath, circularBitmapDrawable);
                         }
-                        iPosterLoadingCallback.onBitmapGet(imagePath, circularBitmapDrawable);
-                    }
-                });
+                    });
+        }
     }
 }

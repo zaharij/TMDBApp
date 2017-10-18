@@ -71,8 +71,4 @@ public class Result implements Serializable{
     public String getReleaseDate() {
         return releaseDate;
     }
-
-    public Boolean getVideo() {
-        return video;
-    }
 }

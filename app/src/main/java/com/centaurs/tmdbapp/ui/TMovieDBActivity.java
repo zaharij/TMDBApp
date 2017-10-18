@@ -15,6 +15,7 @@ public class TMovieDBActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tmovie_db);
 
+
         TMoviesDBApi.getInstance().loadGenres();
 
         FragmentManager fm = getSupportFragmentManager();

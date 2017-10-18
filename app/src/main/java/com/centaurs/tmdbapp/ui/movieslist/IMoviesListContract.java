@@ -15,10 +15,7 @@ import retrofit2.Response;
 
 interface IMoviesListContract {
     interface IView {
-        void putResultsToAdapter(List<Result> results);
         void hideMainProgress();
-        void addLoadingFooter();
-        void removeLoadingFooter();
         void setTotalPages(int totalPages);
         void setIsLoading(boolean isLoading);
         void setIsLastPage(boolean isLastPage);
@@ -26,11 +23,13 @@ interface IMoviesListContract {
         void goToNetworkConnectionTroublesFragment();
         void setPoster(String key, Drawable drawable);
         void setResultListToAdapter(List<Result> results);
+        void notifyItemInserted(boolean isLoadingAdded, int position);
+        void notifyItemRemoved(boolean isLoadingAdded, int position);
     }
 
     interface IPresenter extends IBasePresenter<IView>{
         void viewAttached(Context context);
-        void onScrolledToEnd(Context context);
+        void onScrolledToEnd();
         void preLoadMoreItems();
         void onLoadMoreItems();
         void onPutResultsToAdapter(@NotNull Response<TopRatedMovies> response);

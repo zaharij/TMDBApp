@@ -13,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.centaurs.tmdbapp.R;
-import com.centaurs.tmdbapp.ui.PresenterManager;
 import com.centaurs.tmdbapp.ui.movieslist.MoviesListFragment;
 import com.centaurs.tmdbapp.util.LoginHelper;
 
@@ -26,11 +25,7 @@ public class UserLoginFragment extends Fragment implements IUserLoginContract.IV
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState == null) {
-            iPresenter = new UserLoginIPresenter(new LoginHelper(getActivity(), iConnectionFailedListener));
-        } else {
-            iPresenter = (IUserLoginContract.IPresenter) PresenterManager.getInstance().restorePresenter(savedInstanceState);
-        }
+        iPresenter = new UserLoginIPresenter(new LoginHelper(getActivity(), iConnectionFailedListener));
         iPresenter.attachView(this);
     }
 
@@ -54,12 +49,6 @@ public class UserLoginFragment extends Fragment implements IUserLoginContract.IV
     public void onResume() {
         super.onResume();
         iPresenter.onViewCreated();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        PresenterManager.getInstance().savePresenter(iPresenter, outState);
     }
 
     private View.OnClickListener onButtonClickListener = new View.OnClickListener() {

@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.data.models.Result;
-import com.centaurs.tmdbapp.ui.PresenterManager;
 
 public class MovieDetailFragment extends Fragment implements IMovieDetailContract.IView{
     private static final String MOVIE_ID_ARG = "movie_id";
@@ -32,11 +31,7 @@ public class MovieDetailFragment extends Fragment implements IMovieDetailContrac
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState == null) {
-            presenter = new MovieDetailPresenter();
-        } else {
-            presenter = (IMovieDetailContract.IPresenter) PresenterManager.getInstance().restorePresenter(savedInstanceState);
-        }
+        presenter = new MovieDetailPresenter();
     }
 
     @Nullable
@@ -56,12 +51,6 @@ public class MovieDetailFragment extends Fragment implements IMovieDetailContrac
     public void onDestroyView() {
         super.onDestroyView();
         presenter.detachView();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        PresenterManager.getInstance().savePresenter(presenter, outState);
     }
 
     @Override
