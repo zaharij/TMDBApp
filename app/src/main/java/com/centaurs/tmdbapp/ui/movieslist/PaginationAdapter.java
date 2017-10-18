@@ -122,31 +122,6 @@ class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 && isLoadingAdded) ? LOADING : ITEM;
     }
 
-//    private void add(Result r) {
-//        results.add(r);
-//        notifyItemInserted(results.size() - 1);
-//    }
-//
-//    void addAll(List<Result> moveResults) {
-//        results.addAll(moveResults);
-//        notifyItemInserted(results.size() - 1);
-//    }
-//
-//    void addLoadingFooter() {
-//        isLoadingAdded = true;
-//        add(new Result());
-//    }
-//
-//    void removeLoadingFooter() {
-//        isLoadingAdded = false;
-//        int position = results.size() - 1;
-//        Result result = results.get(position);
-//        if (result != null) {
-//            results.remove(position);
-//            notifyItemRemoved(position);
-//        }
-//    }
-
     void notifyInserted(boolean isLoadingAdded, int count){
         this.isLoadingAdded = isLoadingAdded;
         notifyItemInserted(count);

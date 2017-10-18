@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +43,6 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
             presenter = new MoviesListPresenter();
-            Log.d("****************", "presenter is null");
         } else {
             presenter = (IMoviesListContract.IPresenter) PresenterManager.getInstance().restorePresenter(savedInstanceState);
             }
@@ -66,7 +64,6 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
         recyclerView.addOnScrollListener(new PaginationScrollListener(gridLayoutManager) {
             @Override
             void preLoadMoreItems() {
-                Log.d("***********************", "pre load more items _ " + totalPages + isLastPage + isLoading);
                 presenter.preLoadMoreItems();
             }
 
