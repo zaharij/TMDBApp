@@ -17,7 +17,6 @@ import java.util.List;
 
 class MoviesListPresenter implements IMoviesListContract.IPresenter {
     private final String TAG = "MoviesListPresenter";
-    private final int TOTAL_PAGES = 1;
     private final int PAGE_START = 1;
     private IMoviesListContract.IView view;
     private boolean isLoading = false;
@@ -47,9 +46,9 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
         @Override
         public void onResponse(@NotNull TopRatedMovies response) {
             view.hideMainProgress();
+            isLastPage = response.getResults().size() < (movies.size() / currentPage);
             onPutResultsToAdapter(response);
-            if (currentPage <= TOTAL_PAGES || currentPage > PAGE_START) addLoadingFooter();
-            else isLastPage = true;
+            if (!isLastPage) addLoadingFooter();
         }
 
         @Override
@@ -65,9 +64,9 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
         public void onResponse(@NotNull TopRatedMovies response) {
             removeLoadingFooter();
             isLoading = false;
+            isLastPage = response.getResults().size() < (movies.size() / currentPage);
             onPutResultsToAdapter(response);
-            if (currentPage != TOTAL_PAGES) addLoadingFooter();
-            else isLastPage = true;
+            if (!isLastPage) addLoadingFooter();
         }
 
         @Override
@@ -106,7 +105,8 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
     public void preLoadMoreItems() {
         view.setIsLoading(isLoading);
         view.setIsLastPage(isLastPage);
-        view.setTotalPages(TOTAL_PAGES);
+        int totalPages = 1;
+        view.setTotalPages(totalPages);
     }
 
     @Override
