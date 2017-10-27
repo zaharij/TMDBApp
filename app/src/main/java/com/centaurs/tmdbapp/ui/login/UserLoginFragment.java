@@ -17,7 +17,7 @@ import com.centaurs.tmdbapp.ui.movieslist.MoviesListFragment;
 import com.centaurs.tmdbapp.util.LoginHelper;
 
 public class UserLoginFragment extends Fragment implements IUserLoginContract.IView {
-    private IUserLoginContract.IPresenter iPresenter;
+    private IUserLoginContract.IPresenter presenter;
     private Button signInButton, signOutButton;
     private ImageView profileImageView;
     private TextView usernameTextView;
@@ -25,8 +25,8 @@ public class UserLoginFragment extends Fragment implements IUserLoginContract.IV
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        iPresenter = new UserLoginIPresenter(new LoginHelper(getActivity(), iConnectionFailedListener));
-        iPresenter.attachView(this);
+        presenter = new UserLoginIPresenter(new LoginHelper(getActivity(), connectionFailedListener));
+        presenter.attachView(this);
     }
 
     @Nullable
@@ -48,7 +48,7 @@ public class UserLoginFragment extends Fragment implements IUserLoginContract.IV
     @Override
     public void onResume() {
         super.onResume();
-        iPresenter.onViewCreated();
+        presenter.onViewCreated();
     }
 
     private View.OnClickListener onButtonClickListener = new View.OnClickListener() {
@@ -56,35 +56,35 @@ public class UserLoginFragment extends Fragment implements IUserLoginContract.IV
         public void onClick(View view) {
             switch (view.getId()){
                 case R.id.sign_in_button:
-                    iPresenter.signInButtonClicked();
+                    presenter.signInButtonClicked();
                     break;
                 case R.id.sign_out_button:
-                    iPresenter.signOutButtonClicked();
+                    presenter.signOutButtonClicked();
                     break;
                 case R.id.movies_button:
-                    iPresenter.moviesButtonClicked();
+                    presenter.moviesButtonClicked();
                     break;
             }
         }
     };
 
-    private LoginHelper.IConnectionFailedListener iConnectionFailedListener = new LoginHelper.IConnectionFailedListener() {
+    private LoginHelper.IConnectionFailedListener connectionFailedListener = new LoginHelper.IConnectionFailedListener() {
         @Override
         public void onConnectionFailed() {
-            iPresenter.onConnectionFailed();
+            presenter.onConnectionFailed();
         }
     };
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        iPresenter.onReceivedLoginResult(requestCode, data);
+        presenter.onReceivedLoginResult(requestCode, data);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        iPresenter.detachView();
+        presenter.detachView();
     }
 
     @Override

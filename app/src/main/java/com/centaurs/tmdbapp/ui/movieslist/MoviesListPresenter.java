@@ -2,9 +2,11 @@ package com.centaurs.tmdbapp.ui.movieslist;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
-import com.centaurs.tmdbapp.data.TMoviesDBApi;
-import com.centaurs.tmdbapp.data.models.Result;
+import com.centaurs.tmdbapp.data.ImageLoader;
+import com.centaurs.tmdbapp.data.MoviesApi;
+import com.centaurs.tmdbapp.data.models.Movie;
 import com.centaurs.tmdbapp.data.models.TopRatedMovies;
 import com.centaurs.tmdbapp.util.NetworkConnection;
 
@@ -13,70 +15,85 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Response;
-
 class MoviesListPresenter implements IMoviesListContract.IPresenter {
+    private final String TAG = "MoviesListPresenter";
     private final int TOTAL_PAGES = 1;
     private final int PAGE_START = 1;
-    private IMoviesListContract.IView iView;
+    private IMoviesListContract.IView view;
     private boolean isLoading = false;
     private boolean isLastPage = false;
-    private TMoviesDBApi tMoviesDBApi;
+    private MoviesApi moviesApi;
     private int currentPage = PAGE_START;
-    private List<Result> movies;
+    private List<Movie> movies;
     private boolean isLoadingAdded = false;
 
     MoviesListPresenter (){
-        tMoviesDBApi = TMoviesDBApi.getInstance();
+        moviesApi = MoviesApi.getInstance();
         movies = new ArrayList<>();
     }
 
     @Override
     public void attachView(IMoviesListContract.IView view) {
-        this.iView = view;
+        this.view = view;
     }
 
     @Override
     public void detachView() {
-        iView = null;
+        view = null;
     }
 
-    private TMoviesDBApi.IDataCallback loadFirstPageCallback = new TMoviesDBApi.IDataCallback() {
+    private MoviesApi.IDataCallback<TopRatedMovies> loadFirstPageCallback
+            = new MoviesApi.IDataCallback<TopRatedMovies>() {
         @Override
-        public void onResponse(@NotNull Response<TopRatedMovies> response) {
-            iView.hideMainProgress();
+        public void onResponse(@NotNull TopRatedMovies response) {
+            view.hideMainProgress();
             onPutResultsToAdapter(response);
             if (currentPage <= TOTAL_PAGES || currentPage > PAGE_START) addLoadingFooter();
             else isLastPage = true;
         }
+
+        @Override
+        public void onFailure(Throwable throwable) {
+            view.hideMainProgress();
+            Log.e(TAG, throwable.getMessage());
+        }
     };
 
-    private TMoviesDBApi.IDataCallback loadNextPageCallback = new TMoviesDBApi.IDataCallback() {
+    private MoviesApi.IDataCallback<TopRatedMovies> loadNextPageCallback
+            = new MoviesApi.IDataCallback<TopRatedMovies>() {
         @Override
-        public void onResponse(@NotNull Response<TopRatedMovies> response) {
+        public void onResponse(@NotNull TopRatedMovies response) {
             removeLoadingFooter();
             isLoading = false;
             onPutResultsToAdapter(response);
             if (currentPage != TOTAL_PAGES) addLoadingFooter();
             else isLastPage = true;
         }
+
+        @Override
+        public void onFailure(Throwable throwable) {
+            Log.e(TAG, throwable.getMessage());
+        }
     };
 
     private void loadFirstPage() {
-        tMoviesDBApi.loadPage(loadFirstPageCallback, currentPage);
+        view.showMainProgress();
+        moviesApi.loadPage(loadFirstPageCallback, currentPage);
     }
 
     private void loadNextPage() {
-        tMoviesDBApi.loadPage(loadNextPageCallback, currentPage);
+        moviesApi.loadPage(loadNextPageCallback, currentPage);
     }
 
     @Override
     public void viewAttached(Context context) {
-        if (NetworkConnection.checkNetworkConnection(context)){
-            iView.setResultListToAdapter(movies);
-            loadFirstPage();
+        if (NetworkConnection.isNetworkConnected(context)){
+            view.setResultListToAdapter(movies);
+            if (movies.size() == 0){
+                loadFirstPage();
+            }
         } else {
-            iView.goToNetworkConnectionTroublesFragment();
+            view.goToNetworkConnectionTroublesFragment();
         }
     }
 
@@ -87,9 +104,9 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
 
     @Override
     public void preLoadMoreItems() {
-        iView.setIsLoading(isLoading);
-        iView.setIsLastPage(isLastPage);
-        iView.setTotalPages(TOTAL_PAGES);
+        view.setIsLoading(isLoading);
+        view.setIsLastPage(isLastPage);
+        view.setTotalPages(TOTAL_PAGES);
     }
 
     @Override
@@ -99,60 +116,53 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
     }
 
     @Override
-    public void onPutResultsToAdapter(@NotNull Response<TopRatedMovies> response) {
-        List<Result> results = fetchResults(response);
+    public void onPutResultsToAdapter(@NotNull TopRatedMovies response) {
+        List<Movie> results = response.getResults();
         addAll(results);
     }
 
     @Override
-    public void onNeedPoster(Context context, String posterPath) {
-        tMoviesDBApi.loadImage(context, true, false, posterPath, iPosterLoadingCallback);
+    public void onNeedPoster(String posterPath) {
+        ImageLoader.getInstance().loadPoster(posterPath,false, posterLoadingCallback);
     }
 
-    private TMoviesDBApi.IPosterLoadingCallback iPosterLoadingCallback = new TMoviesDBApi.IPosterLoadingCallback() {
+    private ImageLoader.IPosterLoadingCallback posterLoadingCallback = new ImageLoader.IPosterLoadingCallback() {
         @Override
-        public void onBitmapGet(String key, Drawable drawable) {
-            iView.setPoster(key, drawable);
+        public void onReturnImageResult(String key, Drawable drawable) {
+            view.setPoster(key, drawable);
         }
     };
 
     @Override
-    public void onItemClicked(Result result) {
-        iView.goToMovieDetailFragment(result);
+    public void onItemClicked(int movieId) {
+        view.goToMovieDetailFragment(movieId);
     }
 
-    private List<Result> fetchResults(Response<TopRatedMovies> response) {
-        TopRatedMovies topRatedMovies = response.body();
-        if (topRatedMovies != null) {
-            return topRatedMovies.getResults();
-        } else {
-            return null;
-        }
+    private void add(Movie movie) {
+        int startPosition = movies.size();
+        movies.add(movie);
+        view.notifyItemInserted(isLoadingAdded, startPosition, movies.size());
     }
 
-
-    private void add(Result r) {
-        movies.add(r);
-        iView.notifyItemInserted(isLoadingAdded, movies.size() - 1);
-    }
-
-    private void addAll(List<Result> moveResults) {
+    private void addAll(List<Movie> moveResults) {
+        int startPosition = movies.size()+1;
         movies.addAll(moveResults);
-        iView.notifyItemInserted(isLoadingAdded, movies.size() - 1);
+        view.notifyItemInserted(isLoadingAdded, startPosition, moveResults.size()+1);
     }
 
     private void addLoadingFooter() {
         isLoadingAdded = true;
-        add(new Result());
+        add(new Movie());
     }
 
     private void removeLoadingFooter() {
         isLoadingAdded = false;
-        int position = movies.size() - 1;
-        Result result = movies.get(position);
-        if (result != null) {
-            movies.remove(position);
-            iView.notifyItemRemoved(isLoadingAdded, position);
+        int startPosition = movies.size() - 1;
+        Movie result = movies.get(startPosition);
+        if (result != null && view != null) {
+            movies.remove(startPosition);
+            int deleteItemNumber = startPosition - (movies.size() - 1);
+            view.notifyItemRemoved(isLoadingAdded, startPosition, deleteItemNumber);
         }
     }
 }

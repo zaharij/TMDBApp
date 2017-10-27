@@ -6,7 +6,7 @@ import android.net.NetworkInfo;
 
 public class NetworkConnection {
 
-    public static boolean checkNetworkConnection(Context context){
+    public static boolean isNetworkConnected(Context context){
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();

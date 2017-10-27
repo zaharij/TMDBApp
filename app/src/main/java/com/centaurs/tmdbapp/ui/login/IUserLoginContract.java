@@ -1,7 +1,6 @@
 package com.centaurs.tmdbapp.ui.login;
 
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 
@@ -19,7 +18,6 @@ interface IUserLoginContract {
         void goToMoviesFragment();
         void setUsername(String username);
         void setDefaultUsername();
-        Context getContext();
     }
 
     interface IPresenter extends IBasePresenter<IView>{

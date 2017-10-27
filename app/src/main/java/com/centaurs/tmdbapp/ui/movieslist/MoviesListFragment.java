@@ -15,7 +15,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.centaurs.tmdbapp.R;
-import com.centaurs.tmdbapp.data.models.Result;
+import com.centaurs.tmdbapp.data.models.Movie;
 import com.centaurs.tmdbapp.ui.PresenterManager;
 import com.centaurs.tmdbapp.ui.moviedetail.MovieDetailFragment;
 import com.centaurs.tmdbapp.ui.networktroubles.NetworkConnectionTroublesFragment;
@@ -47,7 +47,7 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
             presenter = (IMoviesListContract.IPresenter) PresenterManager.getInstance().restorePresenter(savedInstanceState);
             }
         imageViewMap = new HashMap<>();
-        paginationAdapter = new PaginationAdapter(onItemClickListener, onNeedPosterListener, R.layout.item);
+        paginationAdapter = new PaginationAdapter(getContext(), onItemClickListener, onNeedPosterListener, R.layout.item);
     }
 
     @Nullable
@@ -55,6 +55,7 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_movies_list, container, false);
         moviesListProgress = view.findViewById(R.id.movies_list_progress);
+        hideMainProgress();
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), ITEM_SPAN_SIZE);
         gridLayoutManager.setSpanSizeLookup(paginationAdapter.getOnSpanSizeLookup());
         RecyclerView recyclerView = view.findViewById(R.id.movies_recycler_view);
@@ -98,8 +99,8 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
 
     private PaginationAdapter.OnItemClickListener onItemClickListener = new PaginationAdapter.OnItemClickListener() {
         @Override
-        public void onItemClick(Result result) {
-            presenter.onItemClicked(result);
+        public void onItemClick(int movieId) {
+            presenter.onItemClicked(movieId);
         }
     };
 
@@ -107,7 +108,7 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
         @Override
         public void onNeedPoster(ImageView imageView, String posterPath) {
             imageViewMap.put(posterPath, imageView);
-            presenter.onNeedPoster(getContext(), posterPath);
+            presenter.onNeedPoster(posterPath);
         }
     };
 
@@ -137,6 +138,11 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     }
 
     @Override
+    public void showMainProgress() {
+        moviesListProgress.setVisibility(View.VISIBLE);
+    }
+
+    @Override
     public void setTotalPages(int totalPages) {
         this.totalPages = totalPages;
     }
@@ -152,8 +158,8 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     }
 
     @Override
-    public void goToMovieDetailFragment(Result result) {
-        MovieDetailFragment movieDetailFragment = MovieDetailFragment.getInstance(result);
+    public void goToMovieDetailFragment(int movieId) {
+        MovieDetailFragment movieDetailFragment = MovieDetailFragment.getInstance(movieId);
         getActivity().getSupportFragmentManager().beginTransaction()
                 .add(R.id.fragment_container, movieDetailFragment)
                 .addToBackStack(null).commit();
@@ -174,18 +180,18 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     }
 
     @Override
-    public void setResultListToAdapter(List<Result> results) {
-        paginationAdapter.setResults(results);
+    public void setResultListToAdapter(List<Movie> results) {
+        paginationAdapter.setMovies(results);
     }
 
     @Override
-    public void notifyItemInserted(boolean isLoadingAdded, int position) {
-        paginationAdapter.notifyInserted(isLoadingAdded, position);
+    public void notifyItemInserted(boolean isLoadingAdded, int startPosition, int position) {
+        paginationAdapter.notifyInserted(isLoadingAdded, startPosition, position);
     }
 
     @Override
-    public void notifyItemRemoved(boolean isLoadingAdded, int position) {
-        paginationAdapter.notifyRemoved(isLoadingAdded, position);
+    public void notifyItemRemoved(boolean isLoadingAdded, int positionStart, int itemCount) {
+        paginationAdapter.notifyRemoved(isLoadingAdded, positionStart, itemCount);
     }
 
     private NetworkConnectionTroublesFragment.OnRetryListener onRetryListener

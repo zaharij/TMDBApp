@@ -1,6 +1,5 @@
 package com.centaurs.tmdbapp.util;
 
-
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
@@ -17,7 +16,7 @@ import com.google.android.gms.common.api.Status;
 
 public class LoginHelper implements GoogleApiClient.OnConnectionFailedListener {
     private GoogleApiClient googleApiClient;
-    private IConnectionFailedListener iConnectionFailedListener;
+    private IConnectionFailedListener connectionFailedListener;
 
     public interface IConnectionFailedListener {
         void onConnectionFailed();
@@ -31,8 +30,8 @@ public class LoginHelper implements GoogleApiClient.OnConnectionFailedListener {
         void onResult(Status status);
     }
 
-    public LoginHelper(FragmentActivity fragmentActivity, IConnectionFailedListener iConnectionFailedListener){
-        this.iConnectionFailedListener = iConnectionFailedListener;
+    public LoginHelper(FragmentActivity fragmentActivity, IConnectionFailedListener connectionFailedListener){
+        this.connectionFailedListener = connectionFailedListener;
         configureAndBuildGoogleApiClient(fragmentActivity);
     }
 
@@ -52,7 +51,7 @@ public class LoginHelper implements GoogleApiClient.OnConnectionFailedListener {
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        iConnectionFailedListener.onConnectionFailed();
+        connectionFailedListener.onConnectionFailed();
     }
 
     public String getUserName(GoogleSignInResult result){

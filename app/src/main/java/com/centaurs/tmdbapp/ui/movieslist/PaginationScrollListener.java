@@ -25,7 +25,6 @@ abstract class PaginationScrollListener extends RecyclerView.OnScrollListener{
                 loadMoreItems();
             }
         }
-
     }
     abstract void preLoadMoreItems();
     abstract void loadMoreItems();

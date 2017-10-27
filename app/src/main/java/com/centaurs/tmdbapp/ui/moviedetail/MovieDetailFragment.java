@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.centaurs.tmdbapp.R;
-import com.centaurs.tmdbapp.data.models.Result;
+import com.centaurs.tmdbapp.ui.networktroubles.NetworkConnectionTroublesFragment;
 
 public class MovieDetailFragment extends Fragment implements IMovieDetailContract.IView{
     private static final String MOVIE_ID_ARG = "movie_id";
@@ -19,10 +19,9 @@ public class MovieDetailFragment extends Fragment implements IMovieDetailContrac
     private TextView titleTextView, additionalInfoTextView, genresTextView, overviewTextView;
     private IMovieDetailContract.IPresenter presenter;
 
-
-    public static MovieDetailFragment getInstance(Result result){
+    public static MovieDetailFragment getInstance(int movieId){
         Bundle args = new Bundle();
-        args.putSerializable(MOVIE_ID_ARG, result);
+        args.putInt(MOVIE_ID_ARG, movieId);
         MovieDetailFragment movieDetailFragment = new MovieDetailFragment();
         movieDetailFragment.setArguments(args);
         return movieDetailFragment;
@@ -56,7 +55,7 @@ public class MovieDetailFragment extends Fragment implements IMovieDetailContrac
     @Override
     public void onResume() {
         super.onResume();
-        presenter.onViewAttached(getContext(), (Result) getArguments().getSerializable(MOVIE_ID_ARG));
+        presenter.onViewAttached(getContext(), getArguments().getInt(MOVIE_ID_ARG));
     }
 
     @Override
@@ -83,4 +82,21 @@ public class MovieDetailFragment extends Fragment implements IMovieDetailContrac
     public void setPoster(Drawable drawable) {
         posterImageView.setImageDrawable(drawable);
     }
+
+    @Override
+    public void goToNetworkConnectionTroublesFragment() {
+        NetworkConnectionTroublesFragment networkConnectionTroublesFragment
+                = NetworkConnectionTroublesFragment.getInstance(onRetryListener);
+        getActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, networkConnectionTroublesFragment)
+                .commit();
+    }
+
+    private NetworkConnectionTroublesFragment.OnRetryListener onRetryListener
+            = new NetworkConnectionTroublesFragment.OnRetryListener() {
+        @Override
+        public Fragment onRetryGetBackFragment() {
+            return MovieDetailFragment.getInstance(getArguments().getInt(MOVIE_ID_ARG));
+        }
+    };
 }

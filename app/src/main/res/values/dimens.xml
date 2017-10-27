@@ -26,4 +26,5 @@
     <dimen name="movie_additional_info_padding">8dp</dimen>
     <dimen name="item_text_margin">8dp</dimen>
     <dimen name="network_troubles_message_margin">8dp</dimen>
+    <dimen name="loading_items_progress_padding">18dp</dimen>
 </resources>

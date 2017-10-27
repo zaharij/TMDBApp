@@ -2,14 +2,13 @@
     <string name="app_name">TMDBApp</string>
     <string name="rating">rating:\u00A0\</string>
     <string name="genre">Genre:\u00A0\</string>
-    <string name="year_country">Year|Country:\u00A0\</string>
     <string name="no_connection_message">There is no internet connection#8230</string>
     <string name="restart_button">Retry</string>
     <string name="profile_status_default">Signed out</string>
     <string name="account_button">Sign In With Google Account</string>
     <string name="movies_button">Movies</string>
     <string name="sign_out">Sign Out</string>
-    <string name="loading_str">Loading#8230</string>
+    <string name="loading">Loading#8230</string>
 
     <string name="profile_image_content_description">The profile image.</string>
     <string name="user_status">Signed out</string>
@@ -18,4 +17,6 @@
 
     <string name="detail_poster_image_description">Big poster</string>
     <string name="poster_image_description">Small poster</string>
+
+    <string name="year_and_language">%1$s | %2$s</string>
 </resources>

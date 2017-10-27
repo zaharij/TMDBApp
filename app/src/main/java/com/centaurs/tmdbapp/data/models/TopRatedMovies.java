@@ -4,9 +4,9 @@ package com.centaurs.tmdbapp.data.models;
 import java.util.List;
 
 public class TopRatedMovies {
-    private List<Result> results = null;
+    private List<Movie> results;
 
-    public List<Result> getResults() {
+    public List<Movie> getResults() {
         return results;
     }
 }

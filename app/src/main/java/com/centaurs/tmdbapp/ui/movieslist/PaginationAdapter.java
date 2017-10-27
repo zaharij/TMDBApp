@@ -1,5 +1,6 @@
 package com.centaurs.tmdbapp.ui.movieslist;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -9,12 +10,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.centaurs.tmdbapp.R;
-import com.centaurs.tmdbapp.data.models.Result;
+import com.centaurs.tmdbapp.data.models.Movie;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-import static com.centaurs.tmdbapp.data.constants.Constants.GET_DATE_INDEXES_ARR;
-import static com.centaurs.tmdbapp.data.constants.Constants.VERTICAL_DIVIDER;
+import static com.centaurs.tmdbapp.util.Constants.INPUT_DATE_FORMAT_STRING;
+import static com.centaurs.tmdbapp.util.Constants.OUTPUT_DATE_FORMAT_STRING;
 
 class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private static final int ITEM = 0;
@@ -24,26 +28,28 @@ class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private PaginationAdapter.OnItemClickListener onItemClickListener;
     private OnNeedPosterListener onNeedPosterListener;
     private int itemViewRes;
-    private List<Result> results;
+    private List<Movie> movies;
     private boolean isLoadingAdded = false;
+    private Context context;
     
     interface OnItemClickListener{
-        void onItemClick(Result result);
+        void onItemClick(int movieId);
     }
     
     interface OnNeedPosterListener {
         void onNeedPoster(ImageView imageView, String posterPath);
     }
 
-    PaginationAdapter(PaginationAdapter.OnItemClickListener onItemClickListener
+    PaginationAdapter(Context context, PaginationAdapter.OnItemClickListener onItemClickListener
             , OnNeedPosterListener onNeedPosterListener, int itemViewRes) {
+        this.context = context;
         this.onNeedPosterListener = onNeedPosterListener;
         this.itemViewRes = itemViewRes;
         this.onItemClickListener = onItemClickListener;
     }
 
-    void setResults(List<Result> results) {
-        this.results = results;
+    void setMovies(List<Movie> movies) {
+        this.movies = movies;
     }
 
     @Override
@@ -69,7 +75,7 @@ class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         viewHolder.getItemView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onItemClickListener.onItemClick(results.get(viewHolder.getLayoutPosition()));
+                onItemClickListener.onItemClick(movies.get(viewHolder.getLayoutPosition()).getId());
             }
         });
         return viewHolder;
@@ -77,22 +83,28 @@ class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        Result result = results.get(position);
+        Movie movie = movies.get(position);
         switch (getItemViewType(position)) {
             case ITEM:
                 final MovieViewHolder movieViewHolder = (MovieViewHolder) holder;
-                if (result.getTitle() != null){
-                    movieViewHolder.setTitle(result.getTitle());
+                if (movie.getTitle() != null){
+                    movieViewHolder.setTitle(movie.getTitle());
                 }
-                if (result.getReleaseDate() != null && result.getReleaseDate().length() >= GET_DATE_INDEXES_ARR[1]){
-                    movieViewHolder.setAdditionalInfo(result.getReleaseDate()
-                            .substring(GET_DATE_INDEXES_ARR[0], GET_DATE_INDEXES_ARR[1])
-                            .concat(VERTICAL_DIVIDER).concat(result.getOriginalLanguage().toUpperCase()));
+                String yearString = "";
+                try {
+                    Date date = new SimpleDateFormat(INPUT_DATE_FORMAT_STRING, Locale.getDefault()).parse(movie.getReleaseDate());
+                    yearString = new SimpleDateFormat(OUTPUT_DATE_FORMAT_STRING, Locale.getDefault()).format(date);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                if (result.getVoteAverage() != null){
-                    movieViewHolder.setRating(String.valueOf(result.getVoteAverage()));
+                if (movie.getReleaseDate() != null){
+                    movieViewHolder.setAdditionalInfo(context
+                            .getString(R.string.year_and_language, yearString, movie.getOriginalLanguage().toUpperCase()));
                 }
-                onNeedPosterListener.onNeedPoster(movieViewHolder.getPosterImageView(), result.getPosterPath());
+                if (movie.getVoteAverage() != null){
+                    movieViewHolder.setRating(String.valueOf(movie.getVoteAverage()));
+                }
+                onNeedPosterListener.onNeedPoster(movieViewHolder.getPosterImageView(), movie.getPosterPath());
                 break;
             case LOADING:
                 break;
@@ -102,7 +114,7 @@ class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private GridLayoutManager.SpanSizeLookup onSpanSizeLookup = new GridLayoutManager.SpanSizeLookup() {
         @Override
         public int getSpanSize(int position) {
-            return position < results.size() - 1 ? LOADING_SPAN_SIZE : ITEM_SPAN_SIZE;
+            return getItemViewType(position) == 0 ? LOADING_SPAN_SIZE : ITEM_SPAN_SIZE;
         }
     };
 
@@ -112,23 +124,23 @@ class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     @Override
     public int getItemCount() {
-        return results == null ? 0
-                : results.size();
+        return movies == null ? 0
+                : movies.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        return (position == results.size() - 1
+        return (position == movies.size() - 1
                 && isLoadingAdded) ? LOADING : ITEM;
     }
 
-    void notifyInserted(boolean isLoadingAdded, int count){
+    void notifyInserted(boolean isLoadingAdded, int startPosition, int count){
         this.isLoadingAdded = isLoadingAdded;
-        notifyItemInserted(count);
+        notifyItemRangeInserted(startPosition, count);
     }
 
-    void notifyRemoved(boolean isLoadingAdded, int position){
+    void notifyRemoved(boolean isLoadingAdded, int positionStart, int itemCount){
         this.isLoadingAdded = isLoadingAdded;
-        notifyItemRemoved(position);
+        notifyItemRangeRemoved(positionStart, itemCount);
     }
 }

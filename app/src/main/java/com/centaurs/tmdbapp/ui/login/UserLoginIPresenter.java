@@ -4,20 +4,18 @@ package com.centaurs.tmdbapp.ui.login;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 
-import com.centaurs.tmdbapp.data.TMoviesDBApi;
+import com.centaurs.tmdbapp.data.ImageLoader;
 import com.centaurs.tmdbapp.util.LoginHelper;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.Status;
 
 class UserLoginIPresenter implements IUserLoginContract.IPresenter {
     private final int RC_SIGN_IN = 0;
-    private IUserLoginContract.IView iView;
+    private IUserLoginContract.IView view;
     private LoginHelper loginHelper;
-    private TMoviesDBApi tMoviesDBApi;
 
     UserLoginIPresenter(LoginHelper loginHelper){
         this.loginHelper = loginHelper;
-        tMoviesDBApi = TMoviesDBApi.getInstance();
     }
 
     private LoginHelper.ICheckCashedSignInListener checkCashedSignIn = new LoginHelper.ICheckCashedSignInListener() {
@@ -27,7 +25,7 @@ class UserLoginIPresenter implements IUserLoginContract.IPresenter {
         }
     };
 
-    private LoginHelper.ISignOutListener iSignOutListener = new LoginHelper.ISignOutListener() {
+    private LoginHelper.ISignOutListener signOutListener = new LoginHelper.ISignOutListener() {
         @Override
         public void onResult(Status status) {
             updateUIWhenSignOut();
@@ -36,17 +34,17 @@ class UserLoginIPresenter implements IUserLoginContract.IPresenter {
 
     @Override
     public void signInButtonClicked() {
-        iView.showGoogleAccountDialog(loginHelper.getSignInIntent(), RC_SIGN_IN);
+        view.showGoogleAccountDialog(loginHelper.getSignInIntent(), RC_SIGN_IN);
     }
 
     @Override
     public void signOutButtonClicked() {
-        loginHelper.signOut(iSignOutListener);
+        loginHelper.signOut(signOutListener);
     }
 
     @Override
     public void moviesButtonClicked() {
-        iView.goToMoviesFragment();
+        view.goToMoviesFragment();
     }
 
     @Override
@@ -68,39 +66,38 @@ class UserLoginIPresenter implements IUserLoginContract.IPresenter {
 
     @Override
     public void attachView(IUserLoginContract.IView IView) {
-        this.iView = IView;
+        this.view = IView;
     }
 
     @Override
     public void detachView() {
-        iView = null;
+        view = null;
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
-            iView.setUsername(loginHelper.getUserName(result));
+            view.setUsername(loginHelper.getUserName(result));
             if(loginHelper.getPhotoUrlString(result) != null) {
-                tMoviesDBApi.loadImage(iView.getContext(), false, true
-                        , loginHelper.getPhotoUrlString(result), iPosterLoadingCallback);
+                ImageLoader.getInstance().loadImage(loginHelper.getPhotoUrlString(result), posterLoadingCallback);
             }
-            iView.hideSignInButton();
-            iView.showSignOutButton();
+            view.hideSignInButton();
+            view.showSignOutButton();
         } else {
             updateUIWhenSignOut();
         }
     }
 
-    private TMoviesDBApi.IPosterLoadingCallback iPosterLoadingCallback = new TMoviesDBApi.IPosterLoadingCallback() {
+    private ImageLoader.IPosterLoadingCallback posterLoadingCallback = new ImageLoader.IPosterLoadingCallback() {
         @Override
-        public void onBitmapGet(String key, Drawable drawable) {
-            iView.setProfileImage(drawable);
+        public void onReturnImageResult(String key, Drawable drawable) {
+            view.setProfileImage(drawable);
         }
     };
 
     private void updateUIWhenSignOut() {
-        iView.setDefaultUsername();
-        iView.setDefaultProfileImage();
-        iView.hideSignOutButton();
-        iView.showSignInButton();
+        view.setDefaultUsername();
+        view.setDefaultProfileImage();
+        view.hideSignOutButton();
+        view.showSignInButton();
     }
 }
