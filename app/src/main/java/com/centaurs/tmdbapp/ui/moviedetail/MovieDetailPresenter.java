@@ -17,7 +17,7 @@ import java.util.Locale;
 
 import static com.centaurs.tmdbapp.util.Constants.INPUT_DATE_FORMAT_STRING;
 import static com.centaurs.tmdbapp.util.Constants.OUTPUT_DATE_FORMAT_STRING;
-import static com.centaurs.tmdbapp.util.Constants.WORDS_DIVIDER;
+import static com.centaurs.tmdbapp.util.Constants.WORDS_DIVISOR;
 
 class MovieDetailPresenter implements IMovieDetailContract.IPresenter {
     private final String TAG = "MovieDetailPresenter";
@@ -89,7 +89,7 @@ class MovieDetailPresenter implements IMovieDetailContract.IPresenter {
         StringBuilder genresStrBuilder = new StringBuilder();
         for (int i = 0; i < result.getGenres().size(); i++){
             if (i != 0 && i < result.getGenres().size()){
-                genresStrBuilder.append(WORDS_DIVIDER);
+                genresStrBuilder.append(WORDS_DIVISOR);
             }
             genresStrBuilder.append(result.getGenres().get(i).getName());
         }
