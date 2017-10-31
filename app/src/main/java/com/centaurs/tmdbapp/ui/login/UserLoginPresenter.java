@@ -3,22 +3,23 @@ package com.centaurs.tmdbapp.ui.login;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 
 import com.centaurs.tmdbapp.data.ImageLoader;
 import com.centaurs.tmdbapp.util.LoginHelper;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.Status;
 
-class UserLoginIPresenter implements IUserLoginContract.IPresenter {
+class UserLoginPresenter implements IUserLoginContract.IPresenter {
     private final int RC_SIGN_IN = 0;
     private IUserLoginContract.IView view;
     private LoginHelper loginHelper;
 
-    UserLoginIPresenter(LoginHelper loginHelper){
+    UserLoginPresenter(LoginHelper loginHelper){
         this.loginHelper = loginHelper;
     }
 
-    private LoginHelper.ICheckCashedSignInListener checkCashedSignIn = new LoginHelper.ICheckCashedSignInListener() {
+    private LoginHelper.ICheckCachedSignInListener checkCachedSignIn = new LoginHelper.ICheckCachedSignInListener() {
         @Override
         public void check(GoogleSignInResult result) {
             handleSignInResult(result);
@@ -60,8 +61,8 @@ class UserLoginIPresenter implements IUserLoginContract.IPresenter {
     }
 
     @Override
-    public void onViewCreated() {
-        loginHelper.checkCashedSignIn(checkCashedSignIn);
+    public void onViewResumed() {
+        loginHelper.checkCachedSignIn(checkCachedSignIn);
     }
 
     @Override
@@ -89,8 +90,10 @@ class UserLoginIPresenter implements IUserLoginContract.IPresenter {
 
     private ImageLoader.IPosterLoadingCallback posterLoadingCallback = new ImageLoader.IPosterLoadingCallback() {
         @Override
-        public void onReturnImageResult(String key, Drawable drawable) {
-            view.setProfileImage(drawable);
+        public void onReturnImageResult(String key, @Nullable Drawable drawable) {
+            if (drawable != null){
+                view.setProfileImage(drawable);
+            }
         }
     };
 

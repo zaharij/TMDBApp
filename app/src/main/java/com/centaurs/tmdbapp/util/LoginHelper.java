@@ -22,7 +22,7 @@ public class LoginHelper implements GoogleApiClient.OnConnectionFailedListener {
         void onConnectionFailed();
     }
 
-    public interface ICheckCashedSignInListener {
+    public interface ICheckCachedSignInListener {
         void check(GoogleSignInResult result);
     }
 
@@ -74,16 +74,16 @@ public class LoginHelper implements GoogleApiClient.OnConnectionFailedListener {
         return Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
     }
 
-    public void checkCashedSignIn(final ICheckCashedSignInListener iCheckCashedSignInListener){
+    public void checkCachedSignIn(final ICheckCachedSignInListener checkCachedSignInListener){
         OptionalPendingResult<GoogleSignInResult> optionalPendingResult = Auth.GoogleSignInApi.silentSignIn(googleApiClient);
         if (optionalPendingResult.isDone()) {
             GoogleSignInResult googleSignInResult = optionalPendingResult.get();
-            iCheckCashedSignInListener.check(googleSignInResult);
+            checkCachedSignInListener.check(googleSignInResult);
         } else {
             optionalPendingResult.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                 @Override
                 public void onResult(@NonNull GoogleSignInResult googleSignInResult) {
-                    iCheckCashedSignInListener.check(googleSignInResult);
+                    checkCachedSignInListener.check(googleSignInResult);
                 }
             });
         }

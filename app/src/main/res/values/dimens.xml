@@ -27,4 +27,5 @@
     <dimen name="item_text_margin">8dp</dimen>
     <dimen name="network_troubles_message_margin">8dp</dimen>
     <dimen name="loading_items_progress_padding">18dp</dimen>
+    <dimen name="loading_big_poster_padding">12dp</dimen>
 </resources>

@@ -8,6 +8,7 @@
     <color name="network_troubles_message">#ffffff</color>
     <color name="button_text">#fcfcfc</color>
     <color name="user_status">#ffffff</color>
-    <color name="item_movie_card_background">#fffdc6</color>
+    <color name="item_movie_card_background">#ffffff</color>
     <color name="app_background">#000000</color>
+    <color name="message_background">#84020202</color>
 </resources>

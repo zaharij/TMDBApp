@@ -45,15 +45,15 @@ public class MoviesApi {
         });
     }
 
-    public void loadPage(final IDataCallback<TopRatedMovies> iDataCallback, int currentPage){
+    public void loadPage(final IDataCallback<TopRatedMovies> dataCallback, int currentPage){
         getTopRatedMovies(currentPage).enqueue(new Callback<TopRatedMovies>() {
             @Override
             public void onResponse(@NotNull Call<TopRatedMovies> call, @NotNull Response<TopRatedMovies> response) {
-                iDataCallback.onResponse(response.body());
+                dataCallback.onResponse(response.body());
             }
             @Override
             public void onFailure(@NotNull Call<TopRatedMovies> call, @NotNull Throwable t) {
-                iDataCallback.onFailure(t);
+                dataCallback.onFailure(t);
             }
         });
     }

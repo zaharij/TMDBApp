@@ -26,6 +26,6 @@ interface IUserLoginContract {
         void moviesButtonClicked();
         void onConnectionFailed();
         void onReceivedLoginResult(int requestCode, Intent data);
-        void onViewCreated();
+        void onViewResumed();
     }
 }

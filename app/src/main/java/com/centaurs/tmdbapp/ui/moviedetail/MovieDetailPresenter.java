@@ -1,15 +1,14 @@
 package com.centaurs.tmdbapp.ui.moviedetail;
 
-
-import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.data.ImageLoader;
 import com.centaurs.tmdbapp.data.MoviesApi;
 import com.centaurs.tmdbapp.data.models.Movie;
-import com.centaurs.tmdbapp.util.NetworkConnection;
+import com.centaurs.tmdbapp.util.NetworkConnectionUtil;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -38,12 +37,13 @@ class MovieDetailPresenter implements IMovieDetailContract.IPresenter {
     }
 
     @Override
-    public void onViewAttached(final Context context, final int movieId) {
-        if (NetworkConnection.isNetworkConnected(context)){
+    public void onViewResumed(final int movieId) {
+        if (NetworkConnectionUtil.getInstance().isNetworkConnected()){
+            view.showPosterLoadingProgress();
             MoviesApi.getInstance().loadMovie(new MoviesApi.IDataCallback<Movie>() {
                 @Override
                 public void onResponse(final Movie movie) {
-                    view.setGenres(context.getResources().getString(R.string.genre).concat(getGenres(movie)));
+                    view.setGenres(view.getResources().getString(R.string.genre).concat(getGenres(movie)));
                     view.setTitle(movie.getTitle());
                     String yearString = "";
                     try {
@@ -52,8 +52,7 @@ class MovieDetailPresenter implements IMovieDetailContract.IPresenter {
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
-
-                    view.setAdditionalInformation(context
+                    view.setAdditionalInformation(view.getResources()
                             .getString(R.string.year_and_language, yearString, movie.getOriginalLanguage().toUpperCase()));
                     view.setOverview(movie.getOverview());
                     ImageLoader.getInstance().loadPoster( movie.getPosterPath(),true, posterLoadingCallback);
@@ -62,6 +61,11 @@ class MovieDetailPresenter implements IMovieDetailContract.IPresenter {
                 @Override
                 public void onFailure(Throwable throwable) {
                     Log.e(TAG, throwable.getMessage());
+                    if (!NetworkConnectionUtil.getInstance().isNetworkConnected()){
+                        view.goToNetworkConnectionTroublesFragment();
+                    } else {
+                        view.showSomethingWrongMessage();
+                    }
                 }
             }, movieId);
         } else {
@@ -71,8 +75,13 @@ class MovieDetailPresenter implements IMovieDetailContract.IPresenter {
 
     private ImageLoader.IPosterLoadingCallback posterLoadingCallback = new ImageLoader.IPosterLoadingCallback() {
         @Override
-        public void onReturnImageResult(String key, Drawable drawable) {
-            view.setPoster(drawable);
+        public void onReturnImageResult(String key, @Nullable Drawable drawable) {
+            view.hidePosterLoadingProgress();
+            if(drawable != null){
+                view.setPoster(drawable);
+            } else {
+                view.showSomethingWrongImage();
+            }
         }
     };
 

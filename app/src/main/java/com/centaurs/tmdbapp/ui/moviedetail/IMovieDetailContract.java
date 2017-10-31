@@ -1,7 +1,7 @@
 package com.centaurs.tmdbapp.ui.moviedetail;
 
 
-import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 
 import com.centaurs.tmdbapp.ui.IBasePresenter;
@@ -14,9 +14,14 @@ interface IMovieDetailContract {
         void setOverview(String overview);
         void setPoster(Drawable drawable);
         void goToNetworkConnectionTroublesFragment();
+        void showPosterLoadingProgress();
+        void hidePosterLoadingProgress();
+        Resources getResources();
+        void showSomethingWrongMessage();
+        void showSomethingWrongImage();
     }
 
     interface IPresenter extends IBasePresenter<IView>{
-        void onViewAttached(Context context, int movieId);
+        void onViewResumed(int movieId);
     }
 }

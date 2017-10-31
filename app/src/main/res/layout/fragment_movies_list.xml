@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/app_background">
@@ -14,6 +15,19 @@
         android:id="@+id/movies_list_progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"/>
+        android:layout_gravity="center"
+        tools:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/item_progress_troubles_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/message_background"
+        android:gravity="center_horizontal"
+        android:padding="@dimen/loading_items_progress_padding"
+        android:textColor="?attr/colorError"
+        android:visibility="gone"
+        tools:text="@string/network_connection_troubles_message"/>
 
 </FrameLayout>

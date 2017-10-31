@@ -2,20 +2,20 @@ package com.centaurs.tmdbapp.ui.networktroubles;
 
 
 class NetworkConnectionTroublesPresenter implements INetworkConnectionTroublesContract.IPresenter {
-    private INetworkConnectionTroublesContract.IView iView;
+    private INetworkConnectionTroublesContract.IView view;
 
     @Override
     public void attachView(INetworkConnectionTroublesContract.IView view) {
-        iView = view;
+        this.view = view;
     }
 
     @Override
     public void detachView() {
-        iView = null;
+        view = null;
     }
 
     @Override
     public void onRetryButtonClicked() {
-        iView.goBackToPreviousFragment();
+        view.goBackToPreviousFragment();
     }
 }

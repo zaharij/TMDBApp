@@ -10,10 +10,10 @@
 
     <ImageView
         android:id="@+id/profile_image_view"
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/profile_height"
         android:layout_height="@dimen/profile_height"
-        android:contentDescription="@string/profile_image_content_description"
-        app:srcCompat="@drawable/profile_image_default"/>
+        android:background="@drawable/profile_default"
+        android:contentDescription="@string/profile_image_content_description"/>
 
     <TextView
         android:id="@+id/username_text_view"

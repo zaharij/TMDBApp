@@ -2,27 +2,17 @@ package com.centaurs.tmdbapp;
 
 
 import android.app.Application;
-import android.content.Context;
 
 import com.centaurs.tmdbapp.data.ImageLoader;
+import com.centaurs.tmdbapp.util.NetworkConnectionUtil;
 
 public class MovieApplication extends Application {
-
-    public interface IOnNeedAppContext {
-        Context getContext();
-    }
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        ImageLoader.getInstance(onNeedContext);
+        ImageLoader.getInstance(getApplicationContext());
+        NetworkConnectionUtil.getInstance(getApplicationContext());
     }
-
-    private IOnNeedAppContext onNeedContext = new IOnNeedAppContext() {
-        @Override
-        public Context getContext() {
-            return getApplicationContext();
-        }
-    };
 }

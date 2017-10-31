@@ -1,6 +1,8 @@
 package com.centaurs.tmdbapp.data;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
@@ -9,37 +11,69 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.centaurs.tmdbapp.data.models.Configuration;
-import com.centaurs.tmdbapp.MovieApplication;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ImageLoader {
     private final String TAG = "ImageLoader";
+    private final String LOADING_FAILED_MESSAGE = "Loading failed!";
     private static ImageLoader imageLoader;
-    private String originalPosterSize;
-    private String minPosterSize;
-    private MovieApplication.IOnNeedAppContext onNeedContext;
+    private String originalPosterUrl;
+    private String minPosterUrl;
+    private Context context;
+    // storage for call parameters in case when image url is not ready
+    private Map<String, IPosterLoadingCallback> originalPosterCallTempMap;
+    private Map<String, IPosterLoadingCallback> minPosterCallTempMap;
 
-    private ImageLoader(MovieApplication.IOnNeedAppContext onNeedContext){
-        this.onNeedContext = onNeedContext;
-        MoviesApi.IDataCallback<Configuration> baseImageUrlCallback = new MoviesApi.IDataCallback<Configuration>() {
-            @Override
-            public void onResponse(Configuration response) {
-                String basePosterUrl = response.getImages().getBaseUrl();
-                originalPosterSize = basePosterUrl.concat(response.getImages().getPosterSizes()
-                        .get(response.getImages().getPosterSizes().size() - 1));
-                minPosterSize = basePosterUrl.concat(response.getImages().getPosterSizes().get(0));
-            }
-
-            @Override
-            public void onFailure(Throwable throwable) {
-                Log.e(TAG, throwable.getMessage());
-            }
-        };
-        MoviesApi.getInstance().loadMoviesConfiguration(baseImageUrlCallback);
+    private ImageLoader(Context context){
+        this.context = context;
     }
 
-    public static ImageLoader getInstance(MovieApplication.IOnNeedAppContext onNeedContext){
+    public interface IPosterLoadingCallback{
+        void onReturnImageResult(String key, @Nullable Drawable drawable);
+    }
+
+    private MoviesApi.IDataCallback<Configuration> baseOriginalPosterUrlCallback = new MoviesApi.IDataCallback<Configuration>() {
+        @Override
+        public void onResponse(Configuration response) {
+            String basePosterUrl = response.getImages().getBaseUrl();
+            originalPosterUrl = basePosterUrl.concat(response.getImages().getPosterSizes()
+                    .get(response.getImages().getPosterSizes().size() - 1));
+            for(String posterPath: originalPosterCallTempMap.keySet()){
+                loadImageFromNetwork(originalPosterUrl, posterPath, originalPosterCallTempMap.get(posterPath), false);
+            }
+            originalPosterCallTempMap = null;
+        }
+
+        @Override
+        public void onFailure(Throwable throwable) {
+            originalPosterCallTempMap = null;
+            Log.e(TAG, throwable.getMessage());
+        }
+    };
+
+    private MoviesApi.IDataCallback<Configuration> baseMinPosterUrlCallback = new MoviesApi.IDataCallback<Configuration>() {
+        @Override
+        public void onResponse(Configuration response) {
+            String basePosterUrl = response.getImages().getBaseUrl();
+            minPosterUrl = basePosterUrl.concat(response.getImages().getPosterSizes().get(0));
+            for(String posterPath: minPosterCallTempMap.keySet()){
+                loadImageFromNetwork(minPosterUrl, posterPath, minPosterCallTempMap.get(posterPath), false);
+            }
+            minPosterCallTempMap = null;
+        }
+
+        @Override
+        public void onFailure(Throwable throwable) {
+            minPosterCallTempMap = null;
+            Log.e(TAG, throwable.getMessage());
+        }
+    };
+
+    public static ImageLoader getInstance(Context context){
         if (imageLoader == null){
-            imageLoader = new ImageLoader(onNeedContext);
+            imageLoader = new ImageLoader(context);
         }
         return imageLoader;
     }
@@ -48,18 +82,41 @@ public class ImageLoader {
         return imageLoader;
     }
 
-    public interface IPosterLoadingCallback{
-        void onReturnImageResult(String key, Drawable drawable);
-    }
-
+    /**
+     * a public method, which loads posters from the Internet
+     * , if image url is not ready yet, it loads the last from the net
+     * , saves the call parameters to the temp storage (originalPosterCallTempMap || minPosterCallTempMap) till loading end
+     * , if url is already loading just saves the call parameters.
+     * @param posterPath - needed poster path
+     * @param isOriginalSize - true if needed size is original
+     * @param posterLoadingCallback - callback when poster is loaded
+     */
     public void loadPoster(String posterPath, boolean isOriginalSize, IPosterLoadingCallback posterLoadingCallback){
-        String imageUrl;
         if (isOriginalSize){
-            imageUrl = originalPosterSize;
+            if (originalPosterUrl == null){
+                if (originalPosterCallTempMap == null){
+                    originalPosterCallTempMap = new HashMap<>();
+                    originalPosterCallTempMap.put(posterPath, posterLoadingCallback);
+                    MoviesApi.getInstance().loadMoviesConfiguration(baseOriginalPosterUrlCallback);
+                } else {
+                    originalPosterCallTempMap.put(posterPath, posterLoadingCallback);
+                }
+            } else {
+                loadImageFromNetwork(originalPosterUrl, posterPath, posterLoadingCallback, false);
+            }
         } else {
-            imageUrl = minPosterSize;
+            if (minPosterUrl == null){
+                if (minPosterCallTempMap == null){
+                    minPosterCallTempMap = new HashMap<>();
+                    minPosterCallTempMap.put(posterPath, posterLoadingCallback);
+                    MoviesApi.getInstance().loadMoviesConfiguration(baseMinPosterUrlCallback);
+                } else {
+                    minPosterCallTempMap.put(posterPath, posterLoadingCallback);
+                }
+            } else {
+                loadImageFromNetwork(minPosterUrl, posterPath, posterLoadingCallback, false);
+            }
         }
-        loadImageFromNetwork(imageUrl, posterPath, posterLoadingCallback, false);
     }
 
     public void loadImage(String posterPath, IPosterLoadingCallback posterLoadingCallback){
@@ -74,7 +131,7 @@ public class ImageLoader {
         } else {
             currentImageUrl = imageUrl;
         }
-        RequestBuilder<Drawable> drawableRequestBuilder = Glide.with(onNeedContext.getContext()).load(currentImageUrl);
+        RequestBuilder<Drawable> drawableRequestBuilder = Glide.with(context).load(currentImageUrl);
         if (isRound){
             drawableRequestBuilder.apply(RequestOptions.circleCropTransform());
         }
@@ -84,6 +141,13 @@ public class ImageLoader {
                 if (resource != null){
                     posterLoadingCallback.onReturnImageResult(imagePath, resource);
                 }
+            }
+
+            @Override
+            public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                super.onLoadFailed(errorDrawable);
+                Log.e(TAG, LOADING_FAILED_MESSAGE);
+                posterLoadingCallback.onReturnImageResult(imagePath, errorDrawable);
             }
         });
     }

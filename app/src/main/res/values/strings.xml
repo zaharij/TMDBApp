@@ -19,4 +19,6 @@
     <string name="poster_image_description">Small poster</string>
 
     <string name="year_and_language">%1$s | %2$s</string>
+
+    <string name="something_went_wrong_message">Something went wrong :(</string>
 </resources>

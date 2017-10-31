@@ -1,6 +1,6 @@
 package com.centaurs.tmdbapp.ui.movieslist;
 
-import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 
 import com.centaurs.tmdbapp.data.models.Movie;
@@ -24,10 +24,13 @@ interface IMoviesListContract {
         void setResultListToAdapter(List<Movie> results);
         void notifyItemInserted(boolean isLoadingAdded, int startPosition, int position);
         void notifyItemRemoved(boolean isLoadingAdded, int positionStart, int itemCount);
+        void showTroublesLoadingNextPageText(String message);
+        void hideTroublesLoadingNextPageText();
+        Resources getResources();
     }
 
     interface IPresenter extends IBasePresenter<IView>{
-        void viewAttached(Context context);
+        void onViewResumed();
         void onScrolledToEnd();
         void preLoadMoreItems();
         void onLoadMoreItems();

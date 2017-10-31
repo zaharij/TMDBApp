@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.centaurs.tmdbapp.R;
@@ -16,8 +17,9 @@ import com.centaurs.tmdbapp.ui.networktroubles.NetworkConnectionTroublesFragment
 public class MovieDetailFragment extends Fragment implements IMovieDetailContract.IView{
     private static final String MOVIE_ID_ARG = "movie_id";
     private ImageView posterImageView;
-    private TextView titleTextView, additionalInfoTextView, genresTextView, overviewTextView;
+    private TextView titleTextView, additionalInfoTextView, genresTextView, overviewTextView, somethingWrongTextView;
     private IMovieDetailContract.IPresenter presenter;
+    private ProgressBar loadingPosterProgress;
 
     public static MovieDetailFragment getInstance(int movieId){
         Bundle args = new Bundle();
@@ -42,20 +44,23 @@ public class MovieDetailFragment extends Fragment implements IMovieDetailContrac
         additionalInfoTextView = view.findViewById(R.id.movie_detail_additional_information_text_view);
         genresTextView = view.findViewById(R.id.movie_detail_genres_text_view);
         overviewTextView = view.findViewById(R.id.movie_detail_overview_text_view);
+        loadingPosterProgress = view.findViewById(R.id.movie_detail_poster_progress_bar);
+        somethingWrongTextView = view.findViewById(R.id.something_wrong_movie_detail_text_view);
+
         presenter.attachView(this);
         return view;
     }
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
         presenter.detachView();
+        super.onDestroyView();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        presenter.onViewAttached(getContext(), getArguments().getInt(MOVIE_ID_ARG));
+        presenter.onViewResumed(getArguments().getInt(MOVIE_ID_ARG));
     }
 
     @Override
@@ -90,6 +95,26 @@ public class MovieDetailFragment extends Fragment implements IMovieDetailContrac
         getActivity().getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, networkConnectionTroublesFragment)
                 .commit();
+    }
+
+    @Override
+    public void showPosterLoadingProgress() {
+        loadingPosterProgress.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void hidePosterLoadingProgress() {
+        loadingPosterProgress.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void showSomethingWrongMessage() {
+        somethingWrongTextView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void showSomethingWrongImage() {
+        posterImageView.setImageResource(R.drawable.something_wrong_emotion);
     }
 
     private NetworkConnectionTroublesFragment.OnRetryListener onRetryListener

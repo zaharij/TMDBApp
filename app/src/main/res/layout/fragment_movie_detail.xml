@@ -2,6 +2,7 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/app_background">
@@ -18,9 +19,26 @@
             android:layout_gravity="center"
             android:layout_marginBottom="@dimen/movie_item_margin"
             android:adjustViewBounds="true"
+            android:background="@drawable/poster_default"
             android:contentDescription="@string/detail_poster_image_description"
             android:scaleType="fitStart"
             app:srcCompat="@android:color/transparent"/>
+
+        <TextView
+            android:id="@+id/something_wrong_movie_detail_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/something_went_wrong_message"
+            android:textColor="?attr/colorError"
+            android:visibility="gone"/>
+
+        <ProgressBar
+            android:id="@+id/movie_detail_poster_progress_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/loading_big_poster_padding"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/movie_detail_title_text_view"
@@ -29,7 +47,8 @@
             android:padding="@dimen/movie_detail_title_padding"
             android:textColor="@color/movie_detail_text"
             android:textSize="@dimen/movie_detail_title_text_size"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            tools:text="Movie Title"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -44,7 +63,8 @@
                 android:padding="@dimen/movie_detail_additional_info_padding"
                 android:textColor="@color/movie_detail_text"
                 android:textSize="@dimen/movie_detail_text_size"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                tools:text="year|language"/>
 
             <TextView
                 android:id="@+id/movie_detail_genres_text_view"
@@ -54,7 +74,8 @@
                 android:padding="@dimen/movie_detail_genres_padding"
                 android:textColor="@color/movie_detail_text"
                 android:textSize="@dimen/movie_detail_text_size"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                tools:text="@string/genre"/>
 
         </LinearLayout>
 
@@ -64,7 +85,8 @@
             android:layout_height="wrap_content"
             android:padding="@dimen/movie_detail_overview_padding"
             android:textColor="@color/movie_detail_text"
-            android:textSize="@dimen/movie_detail_text_size"/>
+            android:textSize="@dimen/movie_detail_text_size"
+            tools:text="Overview"/>
 
     </LinearLayout>
 </ScrollView>

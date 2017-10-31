@@ -14,7 +14,7 @@
         android:id="@+id/movie_poster"
         android:layout_width="match_parent"
         android:layout_height="@dimen/poster_image_height"
-        android:background="@drawable/default_poster"
+        android:background="@drawable/poster_default"
         android:contentDescription="@string/poster_image_description"/>
 
     <TextView
@@ -62,7 +62,7 @@
             android:paddingStart="@dimen/movie_additional_info_padding"
             android:textColor="@android:color/black"
             android:textStyle="bold"
-            tools:text="2009 | EN"/>
+            tools:text="year | language"/>
 
     </LinearLayout>
 

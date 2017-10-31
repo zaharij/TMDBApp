@@ -1,14 +1,14 @@
 package com.centaurs.tmdbapp.ui.movieslist;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
+import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.data.ImageLoader;
 import com.centaurs.tmdbapp.data.MoviesApi;
 import com.centaurs.tmdbapp.data.models.Movie;
 import com.centaurs.tmdbapp.data.models.TopRatedMovies;
-import com.centaurs.tmdbapp.util.NetworkConnection;
+import com.centaurs.tmdbapp.util.NetworkConnectionUtil;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -19,12 +19,12 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
     private final String TAG = "MoviesListPresenter";
     private final int PAGE_START = 1;
     private IMoviesListContract.IView view;
-    private boolean isLoading = false;
-    private boolean isLastPage = false;
+    private boolean isLoading;
+    private boolean isLastPage;
     private MoviesApi moviesApi;
     private int currentPage = PAGE_START;
     private List<Movie> movies;
-    private boolean isLoadingAdded = false;
+    private boolean isLoadingAdded;
 
     MoviesListPresenter (){
         moviesApi = MoviesApi.getInstance();
@@ -55,6 +55,9 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
         public void onFailure(Throwable throwable) {
             view.hideMainProgress();
             Log.e(TAG, throwable.getMessage());
+            if (!NetworkConnectionUtil.getInstance().isNetworkConnected()){
+                view.goToNetworkConnectionTroublesFragment();
+            }
         }
     };
 
@@ -62,7 +65,8 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
             = new MoviesApi.IDataCallback<TopRatedMovies>() {
         @Override
         public void onResponse(@NotNull TopRatedMovies response) {
-            removeLoadingFooter();
+            view.hideTroublesLoadingNextPageText();
+            if (isLoadingAdded) removeLoadingFooter();
             isLoading = false;
             isLastPage = response.getResults().size() < (movies.size() / currentPage);
             onPutResultsToAdapter(response);
@@ -72,6 +76,13 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
         @Override
         public void onFailure(Throwable throwable) {
             Log.e(TAG, throwable.getMessage());
+            if (isLoadingAdded) removeLoadingFooter();
+            isLoading = false;
+            if (!NetworkConnectionUtil.getInstance().isNetworkConnected()){
+                view.showTroublesLoadingNextPageText(view.getResources().getString(R.string.network_connection_troubles_message));
+            } else {
+                view.showTroublesLoadingNextPageText(view.getResources().getString(R.string.something_went_wrong_message));
+            }
         }
     };
 
@@ -85,8 +96,8 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
     }
 
     @Override
-    public void viewAttached(Context context) {
-        if (NetworkConnection.isNetworkConnected(context)){
+    public void onViewResumed() {
+        if (NetworkConnectionUtil.getInstance().isNetworkConnected()){
             view.setResultListToAdapter(movies);
             if (movies.size() == 0){
                 loadFirstPage();

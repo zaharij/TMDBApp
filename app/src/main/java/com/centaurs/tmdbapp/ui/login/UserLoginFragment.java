@@ -25,8 +25,7 @@ public class UserLoginFragment extends Fragment implements IUserLoginContract.IV
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = new UserLoginIPresenter(new LoginHelper(getActivity(), connectionFailedListener));
-        presenter.attachView(this);
+        presenter = new UserLoginPresenter(new LoginHelper(getActivity(), connectionFailedListener));
     }
 
     @Nullable
@@ -42,13 +41,14 @@ public class UserLoginFragment extends Fragment implements IUserLoginContract.IV
 
         profileImageView = view.findViewById(R.id.profile_image_view);
         usernameTextView = view.findViewById(R.id.username_text_view);
+        presenter.attachView(this);
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        presenter.onViewCreated();
+        presenter.onViewResumed();
     }
 
     private View.OnClickListener onButtonClickListener = new View.OnClickListener() {
@@ -82,9 +82,9 @@ public class UserLoginFragment extends Fragment implements IUserLoginContract.IV
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onDestroyView() {
         presenter.detachView();
+        super.onDestroyView();
     }
 
     @Override
@@ -114,7 +114,7 @@ public class UserLoginFragment extends Fragment implements IUserLoginContract.IV
 
     @Override
     public void setDefaultProfileImage() {
-        profileImageView.setImageResource(R.drawable.profile_image_default);
+        profileImageView.setImageResource(R.drawable.profile_default);
     }
 
     @Override

@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.data.models.Movie;
@@ -32,6 +33,7 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     private IMoviesListContract.IPresenter presenter;
     private ProgressBar moviesListProgress;
     private Map<String, ImageView> imageViewMap;
+    private TextView troublesLoadingNextPageTextView;
 
     //not for data storage, only for receiving data from the presenter
     private int totalPages;
@@ -55,7 +57,7 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_movies_list, container, false);
         moviesListProgress = view.findViewById(R.id.movies_list_progress);
-        hideMainProgress();
+        troublesLoadingNextPageTextView = view.findViewById(R.id.item_progress_troubles_text_view);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), ITEM_SPAN_SIZE);
         gridLayoutManager.setSpanSizeLookup(paginationAdapter.getOnSpanSizeLookup());
         RecyclerView recyclerView = view.findViewById(R.id.movies_recycler_view);
@@ -94,6 +96,7 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
                 return isLoading;
             }
         });
+        presenter.attachView(this);
         return view;
     }
 
@@ -115,14 +118,13 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     @Override
     public void onResume() {
         super.onResume();
-        presenter.attachView(this);
-        presenter.viewAttached(getContext());
+        presenter.onViewResumed();
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onDestroyView() {
         presenter.detachView();
+        super.onDestroyView();
     }
 
     @Override
@@ -192,6 +194,17 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     @Override
     public void notifyItemRemoved(boolean isLoadingAdded, int positionStart, int itemCount) {
         paginationAdapter.notifyRemoved(isLoadingAdded, positionStart, itemCount);
+    }
+
+    @Override
+    public void showTroublesLoadingNextPageText(String message) {
+        troublesLoadingNextPageTextView.setVisibility(View.VISIBLE);
+        troublesLoadingNextPageTextView.setText(message);
+    }
+
+    @Override
+    public void hideTroublesLoadingNextPageText() {
+        troublesLoadingNextPageTextView.setVisibility(View.GONE);
     }
 
     private NetworkConnectionTroublesFragment.OnRetryListener onRetryListener

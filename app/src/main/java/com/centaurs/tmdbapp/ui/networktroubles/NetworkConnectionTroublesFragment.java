@@ -55,8 +55,8 @@ public class NetworkConnectionTroublesFragment extends Fragment implements INetw
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
         presenter.detachView();
+        super.onDestroyView();
     }
 
     @Override
