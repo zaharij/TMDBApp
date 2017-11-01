@@ -1,7 +1,6 @@
 package com.centaurs.tmdbapp.ui.moviedetail;
 
 
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 
 import com.centaurs.tmdbapp.ui.IBasePresenter;
@@ -16,7 +15,6 @@ interface IMovieDetailContract {
         void goToNetworkConnectionTroublesFragment();
         void showPosterLoadingProgress();
         void hidePosterLoadingProgress();
-        Resources getResources();
         void showSomethingWrongMessage();
         void showSomethingWrongImage();
     }

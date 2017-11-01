@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.centaurs.tmdbapp.MovieApplication;
 import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.ui.networktroubles.NetworkConnectionTroublesFragment;
 
@@ -33,6 +34,7 @@ public class MovieDetailFragment extends Fragment implements IMovieDetailContrac
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         presenter = new MovieDetailPresenter();
+        MovieApplication.get(getActivity()).getComponent().injectMovieDetailPresenter((MovieDetailPresenter) presenter);
     }
 
     @Nullable

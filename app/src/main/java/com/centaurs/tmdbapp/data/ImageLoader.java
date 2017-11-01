@@ -15,19 +15,25 @@ import com.centaurs.tmdbapp.data.models.Configuration;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class ImageLoader {
     private final String TAG = "ImageLoader";
     private final String LOADING_FAILED_MESSAGE = "Loading failed!";
-    private static ImageLoader imageLoader;
     private String originalPosterUrl;
     private String minPosterUrl;
     private Context context;
+    private MoviesApi moviesApi;
     // storage for call parameters in case when image url is not ready
     private Map<String, IPosterLoadingCallback> originalPosterCallTempMap;
     private Map<String, IPosterLoadingCallback> minPosterCallTempMap;
 
-    private ImageLoader(Context context){
+    @Inject
+    public ImageLoader(Context context, MoviesApi moviesApi){
         this.context = context;
+        this.moviesApi = moviesApi;
     }
 
     public interface IPosterLoadingCallback{
@@ -71,17 +77,6 @@ public class ImageLoader {
         }
     };
 
-    public static ImageLoader getInstance(Context context){
-        if (imageLoader == null){
-            imageLoader = new ImageLoader(context);
-        }
-        return imageLoader;
-    }
-
-    public static ImageLoader getInstance(){
-        return imageLoader;
-    }
-
     /**
      * a public method, which loads posters from the Internet
      * , if image url is not ready yet, it loads the last from the net
@@ -89,7 +84,7 @@ public class ImageLoader {
      * , if url is already loading just saves the call parameters.
      * @param posterPath - needed poster path
      * @param isOriginalSize - true if needed size is original
-     * @param posterLoadingCallback - callback when poster is loaded
+     * @param posterLoadingCallback - callback on poster is loaded
      */
     public void loadPoster(String posterPath, boolean isOriginalSize, IPosterLoadingCallback posterLoadingCallback){
         if (isOriginalSize){
@@ -97,7 +92,7 @@ public class ImageLoader {
                 if (originalPosterCallTempMap == null){
                     originalPosterCallTempMap = new HashMap<>();
                     originalPosterCallTempMap.put(posterPath, posterLoadingCallback);
-                    MoviesApi.getInstance().loadMoviesConfiguration(baseOriginalPosterUrlCallback);
+                    moviesApi.loadMoviesConfiguration(baseOriginalPosterUrlCallback);
                 } else {
                     originalPosterCallTempMap.put(posterPath, posterLoadingCallback);
                 }
@@ -109,7 +104,7 @@ public class ImageLoader {
                 if (minPosterCallTempMap == null){
                     minPosterCallTempMap = new HashMap<>();
                     minPosterCallTempMap.put(posterPath, posterLoadingCallback);
-                    MoviesApi.getInstance().loadMoviesConfiguration(baseMinPosterUrlCallback);
+                    moviesApi.loadMoviesConfiguration(baseMinPosterUrlCallback);
                 } else {
                     minPosterCallTempMap.put(posterPath, posterLoadingCallback);
                 }

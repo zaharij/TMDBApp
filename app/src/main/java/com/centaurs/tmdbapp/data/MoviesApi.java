@@ -6,14 +6,18 @@ import com.centaurs.tmdbapp.data.models.TopRatedMovies;
 
 import org.jetbrains.annotations.NotNull;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.centaurs.tmdbapp.data.constants.DataConstants.*;
+import static com.centaurs.tmdbapp.data.constants.DataConstants.API_KEY;
+import static com.centaurs.tmdbapp.data.constants.DataConstants.LANGUAGE_EN;
 
+@Singleton
 public class MoviesApi {
-    private static MoviesApi moviesApi;
     private IMoviesApi api;
 
     public interface IDataCallback<T> {
@@ -21,15 +25,9 @@ public class MoviesApi {
         void onFailure(Throwable throwable);
     }
 
-    private MoviesApi() {
+    @Inject
+    MoviesApi() {
         api = RetrofitClient.getRetrofitClient().create(IMoviesApi.class);
-    }
-
-    public static com.centaurs.tmdbapp.data.MoviesApi getInstance(){
-        if (moviesApi == null){
-            moviesApi = new MoviesApi();
-        }
-        return moviesApi;
     }
 
     void loadMoviesConfiguration(final IDataCallback<Configuration> baseImageUrlCallback){

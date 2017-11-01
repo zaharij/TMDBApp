@@ -13,19 +13,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.centaurs.tmdbapp.R;
+import com.centaurs.tmdbapp.ui.MovieActivity;
 import com.centaurs.tmdbapp.ui.movieslist.MoviesListFragment;
-import com.centaurs.tmdbapp.util.LoginHelper;
+import com.centaurs.tmdbapp.ui.networktroubles.NetworkConnectionTroublesFragment;
 
 public class UserLoginFragment extends Fragment implements IUserLoginContract.IView {
     private IUserLoginContract.IPresenter presenter;
     private Button signInButton, signOutButton;
     private ImageView profileImageView;
-    private TextView usernameTextView;
+    private TextView usernameTextView, somethingWrongTextView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = new UserLoginPresenter(new LoginHelper(getActivity(), connectionFailedListener));
+        presenter = new UserLoginPresenter();
+        MovieActivity.get(this).getMovieActivityComponent().injectUserLoginPresenter((UserLoginPresenter) presenter);
     }
 
     @Nullable
@@ -41,6 +43,7 @@ public class UserLoginFragment extends Fragment implements IUserLoginContract.IV
 
         profileImageView = view.findViewById(R.id.profile_image_view);
         usernameTextView = view.findViewById(R.id.username_text_view);
+        somethingWrongTextView = view.findViewById(R.id.login_page_something_wrong_with_connection_text_view);
         presenter.attachView(this);
         return view;
     }
@@ -65,13 +68,6 @@ public class UserLoginFragment extends Fragment implements IUserLoginContract.IV
                     presenter.moviesButtonClicked();
                     break;
             }
-        }
-    };
-
-    private LoginHelper.IConnectionFailedListener connectionFailedListener = new LoginHelper.IConnectionFailedListener() {
-        @Override
-        public void onConnectionFailed() {
-            presenter.onConnectionFailed();
         }
     };
 
@@ -138,4 +134,32 @@ public class UserLoginFragment extends Fragment implements IUserLoginContract.IV
     public void setDefaultUsername() {
         usernameTextView.setText(R.string.user_status);
     }
+
+    @Override
+    public void goToNetworkConnectionTroublesFragment() {
+        NetworkConnectionTroublesFragment networkConnectionTroublesFragment
+                = NetworkConnectionTroublesFragment.getInstance(onRetryListener);
+        getActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, networkConnectionTroublesFragment)
+                .commit();
+    }
+
+    @Override
+    public void setSomethingWrongMessage(String message) {
+        somethingWrongTextView.setVisibility(View.VISIBLE);
+        somethingWrongTextView.setText(message);
+    }
+
+    @Override
+    public void hideSomethingWrongMessage() {
+        somethingWrongTextView.setVisibility(View.GONE);
+    }
+
+    private NetworkConnectionTroublesFragment.OnRetryListener onRetryListener
+            = new NetworkConnectionTroublesFragment.OnRetryListener() {
+        @Override
+        public Fragment onRetryGetBackFragment() {
+            return new UserLoginFragment();
+        }
+    };
 }
