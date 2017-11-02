@@ -58,6 +58,7 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
         View view = inflater.inflate(R.layout.fragment_movies_list, container, false);
         moviesListProgress = view.findViewById(R.id.movies_list_progress);
         troublesLoadingNextPageTextView = view.findViewById(R.id.item_progress_troubles_text_view);
+        hideMainProgress();
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), ITEM_SPAN_SIZE);
         gridLayoutManager.setSpanSizeLookup(paginationAdapter.getOnSpanSizeLookup());
         RecyclerView recyclerView = view.findViewById(R.id.movies_recycler_view);
