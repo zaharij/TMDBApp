@@ -18,13 +18,15 @@ interface IUserLoginContract {
         void goToMoviesFragment();
         void setUsername(String username);
         void setDefaultUsername();
+        void goToNetworkConnectionTroublesFragment();
+        void setSomethingWrongMessage(String message);
+        void hideSomethingWrongMessage();
     }
 
     interface IPresenter extends IBasePresenter<IView>{
         void signInButtonClicked();
         void signOutButtonClicked();
         void moviesButtonClicked();
-        void onConnectionFailed();
         void onReceivedLoginResult(int requestCode, Intent data);
         void onViewResumed();
     }

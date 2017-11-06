@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.centaurs.tmdbapp.MovieApplication;
 import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.data.models.Movie;
 import com.centaurs.tmdbapp.ui.PresenterManager;
@@ -45,11 +46,13 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
             presenter = new MoviesListPresenter();
+            MovieApplication.get(getActivity()).getComponent().injectMoviesListPresenter((MoviesListPresenter) presenter);
         } else {
             presenter = (IMoviesListContract.IPresenter) PresenterManager.getInstance().restorePresenter(savedInstanceState);
             }
         imageViewMap = new HashMap<>();
-        paginationAdapter = new PaginationAdapter(getContext(), onItemClickListener, onNeedPosterListener, R.layout.item);
+        paginationAdapter = new PaginationAdapter(onItemClickListener, onNeedPosterListener, R.layout.item);
+        MovieApplication.get(getActivity()).getComponent().injectPaginationAdapter(paginationAdapter);
     }
 
     @Nullable
@@ -57,6 +60,7 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_movies_list, container, false);
         moviesListProgress = view.findViewById(R.id.movies_list_progress);
+        hideMainProgress();
         troublesLoadingNextPageTextView = view.findViewById(R.id.item_progress_troubles_text_view);
         hideMainProgress();
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), ITEM_SPAN_SIZE);

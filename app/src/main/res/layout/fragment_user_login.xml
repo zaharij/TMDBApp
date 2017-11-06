@@ -57,4 +57,11 @@
         android:textSize="@dimen/button_text_size"
         android:visibility="gone"
         tools:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/login_page_something_wrong_with_connection_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/network_troubles_message_margin"
+        android:visibility="gone"/>
 </LinearLayout>

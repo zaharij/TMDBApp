@@ -1,5 +1,6 @@
 package com.centaurs.tmdbapp.ui.movieslist;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
@@ -15,19 +16,27 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-class MoviesListPresenter implements IMoviesListContract.IPresenter {
+import javax.inject.Inject;
+
+public class MoviesListPresenter implements IMoviesListContract.IPresenter {
     private final String TAG = "MoviesListPresenter";
     private final int PAGE_START = 1;
     private IMoviesListContract.IView view;
     private boolean isLoading;
     private boolean isLastPage;
-    private MoviesApi moviesApi;
     private int currentPage = PAGE_START;
     private List<Movie> movies;
     private boolean isLoadingAdded;
+    @Inject
+    NetworkConnectionUtil networkConnectionUtil;
+    @Inject
+    MoviesApi moviesApi;
+    @Inject
+    ImageLoader imageLoader;
+    @Inject
+    Context context;
 
     MoviesListPresenter (){
-        moviesApi = MoviesApi.getInstance();
         movies = new ArrayList<>();
     }
 
@@ -55,7 +64,7 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
         public void onFailure(Throwable throwable) {
             view.hideMainProgress();
             Log.e(TAG, throwable.getMessage());
-            if (!NetworkConnectionUtil.getInstance().isNetworkConnected()){
+            if (!networkConnectionUtil.isNetworkConnected()){
                 view.goToNetworkConnectionTroublesFragment();
             }
         }
@@ -78,10 +87,10 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
             Log.e(TAG, throwable.getMessage());
             if (isLoadingAdded) removeLoadingFooter();
             isLoading = false;
-            if (!NetworkConnectionUtil.getInstance().isNetworkConnected()){
-                view.showTroublesLoadingNextPageText(view.getResources().getString(R.string.network_connection_troubles_message));
+            if (!networkConnectionUtil.isNetworkConnected()){
+                view.showTroublesLoadingNextPageText(context.getString(R.string.network_connection_troubles_message));
             } else {
-                view.showTroublesLoadingNextPageText(view.getResources().getString(R.string.something_went_wrong_message));
+                view.showTroublesLoadingNextPageText(context.getString(R.string.something_went_wrong_message));
             }
         }
     };
@@ -97,7 +106,7 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
 
     @Override
     public void onViewResumed() {
-        if (NetworkConnectionUtil.getInstance().isNetworkConnected()){
+        if (networkConnectionUtil.isNetworkConnected()){
             view.setResultListToAdapter(movies);
             if (movies.size() == 0){
                 loadFirstPage();
@@ -134,7 +143,7 @@ class MoviesListPresenter implements IMoviesListContract.IPresenter {
 
     @Override
     public void onNeedPoster(String posterPath) {
-        ImageLoader.getInstance().loadPoster(posterPath,false, posterLoadingCallback);
+        imageLoader.loadPoster(posterPath,false, posterLoadingCallback);
     }
 
     private ImageLoader.IPosterLoadingCallback posterLoadingCallback = new ImageLoader.IPosterLoadingCallback() {

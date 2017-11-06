@@ -17,10 +17,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import javax.inject.Inject;
+
 import static com.centaurs.tmdbapp.util.Constants.INPUT_DATE_FORMAT_STRING;
 import static com.centaurs.tmdbapp.util.Constants.OUTPUT_DATE_FORMAT_STRING;
 
-class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private static final int ITEM = 0;
     private static final int LOADING = 1;
     static final int ITEM_SPAN_SIZE = 2;
@@ -30,7 +32,8 @@ class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private int itemViewRes;
     private List<Movie> movies;
     private boolean isLoadingAdded = false;
-    private Context context;
+    @Inject
+    Context context;
     
     interface OnItemClickListener{
         void onItemClick(int movieId);
@@ -40,9 +43,8 @@ class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         void onNeedPoster(ImageView imageView, String posterPath);
     }
 
-    PaginationAdapter(Context context, PaginationAdapter.OnItemClickListener onItemClickListener
+    PaginationAdapter(PaginationAdapter.OnItemClickListener onItemClickListener
             , OnNeedPosterListener onNeedPosterListener, int itemViewRes) {
-        this.context = context;
         this.onNeedPosterListener = onNeedPosterListener;
         this.itemViewRes = itemViewRes;
         this.onItemClickListener = onItemClickListener;
