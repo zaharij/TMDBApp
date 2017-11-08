@@ -1,6 +1,8 @@
-package com.centaurs.tmdbapp.dagger2;
+package com.centaurs.tmdbapp.di.movies;
 
 import android.support.v4.app.FragmentActivity;
+
+import com.centaurs.tmdbapp.util.LoginHelper;
 
 import dagger.Module;
 import dagger.Provides;
@@ -16,5 +18,10 @@ public class FragmentActivityModule {
     @Provides
     FragmentActivity fragmentActivity(){
         return fragmentActivity;
+    }
+
+    @Provides
+    LoginHelper loginHelper(FragmentActivity fragmentActivity){
+        return new LoginHelper(fragmentActivity);
     }
 }

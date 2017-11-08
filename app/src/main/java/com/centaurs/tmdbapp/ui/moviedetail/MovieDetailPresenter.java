@@ -16,8 +16,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import javax.inject.Inject;
-
 import static com.centaurs.tmdbapp.util.Constants.INPUT_DATE_FORMAT_STRING;
 import static com.centaurs.tmdbapp.util.Constants.OUTPUT_DATE_FORMAT_STRING;
 import static com.centaurs.tmdbapp.util.Constants.WORDS_DIVISOR;
@@ -25,14 +23,18 @@ import static com.centaurs.tmdbapp.util.Constants.WORDS_DIVISOR;
 public class MovieDetailPresenter implements IMovieDetailContract.IPresenter {
     private final String TAG = "MovieDetailPresenter";
     private IMovieDetailContract.IView view;
-    @Inject
     NetworkConnectionUtil networkConnectionUtil;
-    @Inject
     MoviesApi moviesApi;
-    @Inject
     ImageLoader imageLoader;
-    @Inject
     Context context;
+
+    public MovieDetailPresenter (NetworkConnectionUtil networkConnectionUtil, MoviesApi moviesApi
+            , ImageLoader imageLoader, Context context){
+        this.networkConnectionUtil = networkConnectionUtil;
+        this.moviesApi = moviesApi;
+        this.imageLoader = imageLoader;
+        this.context = context;
+    }
 
     @Override
     public void attachView(IMovieDetailContract.IView view) {

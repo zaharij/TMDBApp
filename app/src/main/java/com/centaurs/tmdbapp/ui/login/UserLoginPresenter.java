@@ -15,20 +15,22 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.Status;
 
-import javax.inject.Inject;
-
 public class UserLoginPresenter implements IUserLoginContract.IPresenter {
     private final static String TAG = "UserLoginPresenter";
     private final int RC_SIGN_IN = 0;
     private IUserLoginContract.IView view;
-    @Inject
     LoginHelper loginHelper;
-    @Inject
     ImageLoader imageLoader;
-    @Inject
     NetworkConnectionUtil networkConnectionUtil;
-    @Inject
     Context context;
+
+    public UserLoginPresenter (LoginHelper loginHelper, NetworkConnectionUtil networkConnectionUtil
+            , ImageLoader imageLoader, Context context){
+        this.loginHelper = loginHelper;
+        this.networkConnectionUtil = networkConnectionUtil;
+        this.imageLoader = imageLoader;
+        this.context = context;
+    }
 
     private LoginHelper.IConnectionFailedListener connectionFailedListener = new LoginHelper.IConnectionFailedListener() {
         @Override

@@ -5,7 +5,7 @@ import android.graphics.drawable.Drawable;
 
 import com.centaurs.tmdbapp.ui.IBasePresenter;
 
-interface IMovieDetailContract {
+public interface IMovieDetailContract {
     interface IView {
         void setTitle(String title);
         void setAdditionalInformation(String additionalInformation);

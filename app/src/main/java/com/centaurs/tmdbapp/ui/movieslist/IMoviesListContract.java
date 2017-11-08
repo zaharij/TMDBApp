@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-interface IMoviesListContract {
+public  interface IMoviesListContract {
     interface IView {
         void hideMainProgress();
         void showMainProgress();

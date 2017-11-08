@@ -15,9 +15,9 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.centaurs.tmdbapp.MovieApplication;
 import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.data.models.Movie;
+import com.centaurs.tmdbapp.ui.MovieActivity;
 import com.centaurs.tmdbapp.ui.PresenterManager;
 import com.centaurs.tmdbapp.ui.moviedetail.MovieDetailFragment;
 import com.centaurs.tmdbapp.ui.networktroubles.NetworkConnectionTroublesFragment;
@@ -26,12 +26,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import static com.centaurs.tmdbapp.ui.movieslist.PaginationAdapter.ITEM_SPAN_SIZE;
 
 public class MoviesListFragment extends Fragment implements IMoviesListContract.IView{
     private static final int SCROLLING_DURATION = 1000;
     private PaginationAdapter paginationAdapter;
-    private IMoviesListContract.IPresenter presenter;
+    @Inject
+    IMoviesListContract.IPresenter presenter;
     private ProgressBar moviesListProgress;
     private Map<String, ImageView> imageViewMap;
     private TextView troublesLoadingNextPageTextView;
@@ -44,15 +47,10 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState == null) {
-            presenter = new MoviesListPresenter();
-            MovieApplication.get(getActivity()).getComponent().injectMoviesListPresenter((MoviesListPresenter) presenter);
-        } else {
-            presenter = (IMoviesListContract.IPresenter) PresenterManager.getInstance().restorePresenter(savedInstanceState);
-            }
+        MovieActivity.get(this).getMovieComponent().inject(this);
         imageViewMap = new HashMap<>();
         paginationAdapter = new PaginationAdapter(onItemClickListener, onNeedPosterListener, R.layout.item);
-        MovieApplication.get(getActivity()).getComponent().injectPaginationAdapter(paginationAdapter);
+        MovieActivity.get(this).getMovieComponent().inject(paginationAdapter);
     }
 
     @Nullable

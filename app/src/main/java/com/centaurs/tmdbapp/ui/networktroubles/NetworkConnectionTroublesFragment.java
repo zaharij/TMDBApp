@@ -9,12 +9,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.centaurs.tmdbapp.R;
+import com.centaurs.tmdbapp.ui.MovieActivity;
 
 import java.io.Serializable;
 
+import javax.inject.Inject;
+
 public class NetworkConnectionTroublesFragment extends Fragment implements INetworkConnectionTroublesContract.IView {
     private final static String RETRY_LISTENER_ARG = "onRetry";
-    private INetworkConnectionTroublesContract.IPresenter presenter;
+    @Inject
+    INetworkConnectionTroublesContract.IPresenter presenter;
     private OnRetryListener onRetryListener;
 
     public interface OnRetryListener extends Serializable{
@@ -32,7 +36,7 @@ public class NetworkConnectionTroublesFragment extends Fragment implements INetw
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = new NetworkConnectionTroublesPresenter();
+        MovieActivity.get(this).getMovieComponent().inject(this);
         onRetryListener = (OnRetryListener) getArguments().getSerializable(RETRY_LISTENER_ARG);
     }
 

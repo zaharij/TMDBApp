@@ -16,8 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 public class MoviesListPresenter implements IMoviesListContract.IPresenter {
     private final String TAG = "MoviesListPresenter";
     private final int PAGE_START = 1;
@@ -27,16 +25,17 @@ public class MoviesListPresenter implements IMoviesListContract.IPresenter {
     private int currentPage = PAGE_START;
     private List<Movie> movies;
     private boolean isLoadingAdded;
-    @Inject
     NetworkConnectionUtil networkConnectionUtil;
-    @Inject
     MoviesApi moviesApi;
-    @Inject
     ImageLoader imageLoader;
-    @Inject
     Context context;
 
-    MoviesListPresenter (){
+    public MoviesListPresenter (NetworkConnectionUtil networkConnectionUtil, MoviesApi moviesApi
+            , ImageLoader imageLoader, Context context){
+        this.networkConnectionUtil = networkConnectionUtil;
+        this.moviesApi = moviesApi;
+        this.imageLoader = imageLoader;
+        this.context = context;
         movies = new ArrayList<>();
     }
 

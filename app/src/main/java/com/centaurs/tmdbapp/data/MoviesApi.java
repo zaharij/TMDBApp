@@ -6,7 +6,6 @@ import com.centaurs.tmdbapp.data.models.TopRatedMovies;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import retrofit2.Call;
@@ -25,8 +24,7 @@ public class MoviesApi {
         void onFailure(Throwable throwable);
     }
 
-    @Inject
-    MoviesApi() {
+    public MoviesApi() {
         api = RetrofitClient.getRetrofitClient().create(IMoviesApi.class);
     }
 

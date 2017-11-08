@@ -11,15 +11,18 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.centaurs.tmdbapp.MovieApplication;
 import com.centaurs.tmdbapp.R;
+import com.centaurs.tmdbapp.ui.MovieActivity;
 import com.centaurs.tmdbapp.ui.networktroubles.NetworkConnectionTroublesFragment;
+
+import javax.inject.Inject;
 
 public class MovieDetailFragment extends Fragment implements IMovieDetailContract.IView{
     private static final String MOVIE_ID_ARG = "movie_id";
     private ImageView posterImageView;
     private TextView titleTextView, additionalInfoTextView, genresTextView, overviewTextView, somethingWrongTextView;
-    private IMovieDetailContract.IPresenter presenter;
+    @Inject
+    IMovieDetailContract.IPresenter presenter;
     private ProgressBar loadingPosterProgress;
 
     public static MovieDetailFragment getInstance(int movieId){
@@ -33,8 +36,7 @@ public class MovieDetailFragment extends Fragment implements IMovieDetailContrac
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = new MovieDetailPresenter();
-        MovieApplication.get(getActivity()).getComponent().injectMovieDetailPresenter((MovieDetailPresenter) presenter);
+        MovieActivity.get(this).getMovieComponent().inject(this);
     }
 
     @Nullable

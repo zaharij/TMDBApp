@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 
-import com.centaurs.tmdbapp.dagger2.MovieActivityScope;
+import com.centaurs.tmdbapp.di.movies.MovieScope;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -15,9 +15,7 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
-import javax.inject.Inject;
-
-@MovieActivityScope
+@MovieScope
 public class LoginHelper implements GoogleApiClient.OnConnectionFailedListener {
     private GoogleApiClient googleApiClient;
     private IConnectionFailedListener connectionFailedListener;
@@ -34,8 +32,7 @@ public class LoginHelper implements GoogleApiClient.OnConnectionFailedListener {
         void onResult(Status status);
     }
 
-    @Inject
-    LoginHelper(FragmentActivity fragmentActivity){
+    public LoginHelper(FragmentActivity fragmentActivity){
         configureAndBuildGoogleApiClient(fragmentActivity);
     }
 

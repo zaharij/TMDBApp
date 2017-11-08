@@ -1,7 +1,7 @@
 package com.centaurs.tmdbapp.ui.networktroubles;
 
 
-class NetworkConnectionTroublesPresenter implements INetworkConnectionTroublesContract.IPresenter {
+public class NetworkConnectionTroublesPresenter implements INetworkConnectionTroublesContract.IPresenter {
     private INetworkConnectionTroublesContract.IView view;
 
     @Override

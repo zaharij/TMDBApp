@@ -15,7 +15,6 @@ import com.centaurs.tmdbapp.data.models.Configuration;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
@@ -30,7 +29,6 @@ public class ImageLoader {
     private Map<String, IPosterLoadingCallback> originalPosterCallTempMap;
     private Map<String, IPosterLoadingCallback> minPosterCallTempMap;
 
-    @Inject
     public ImageLoader(Context context, MoviesApi moviesApi){
         this.context = context;
         this.moviesApi = moviesApi;

@@ -6,7 +6,7 @@ import android.graphics.drawable.Drawable;
 
 import com.centaurs.tmdbapp.ui.IBasePresenter;
 
-interface IUserLoginContract {
+public interface IUserLoginContract {
     interface IView {
         void showSignInButton();
         void hideSignInButton();

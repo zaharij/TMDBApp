@@ -17,8 +17,11 @@ import com.centaurs.tmdbapp.ui.MovieActivity;
 import com.centaurs.tmdbapp.ui.movieslist.MoviesListFragment;
 import com.centaurs.tmdbapp.ui.networktroubles.NetworkConnectionTroublesFragment;
 
+import javax.inject.Inject;
+
 public class UserLoginFragment extends Fragment implements IUserLoginContract.IView {
-    private IUserLoginContract.IPresenter presenter;
+    @Inject
+    IUserLoginContract.IPresenter presenter;
     private Button signInButton, signOutButton;
     private ImageView profileImageView;
     private TextView usernameTextView, somethingWrongTextView;
@@ -26,8 +29,7 @@ public class UserLoginFragment extends Fragment implements IUserLoginContract.IV
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = new UserLoginPresenter();
-        MovieActivity.get(this).getMovieActivityComponent().injectUserLoginPresenter((UserLoginPresenter) presenter);
+        MovieActivity.get(this).getMovieComponent().inject(this);
     }
 
     @Nullable
