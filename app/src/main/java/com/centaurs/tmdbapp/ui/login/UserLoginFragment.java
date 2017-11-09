@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.centaurs.tmdbapp.R;
-import com.centaurs.tmdbapp.ui.MovieActivity;
+import com.centaurs.tmdbapp.di.Injector;
 import com.centaurs.tmdbapp.ui.movieslist.MoviesListFragment;
 import com.centaurs.tmdbapp.ui.networktroubles.NetworkConnectionTroublesFragment;
 
@@ -29,7 +29,7 @@ public class UserLoginFragment extends Fragment implements IUserLoginContract.IV
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MovieActivity.get(this).getMovieComponent().inject(this);
+        Injector.getInstance().getMovieComponent().inject(this);
     }
 
     @Nullable

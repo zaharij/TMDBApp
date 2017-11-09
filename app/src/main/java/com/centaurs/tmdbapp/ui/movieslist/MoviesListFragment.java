@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.data.models.Movie;
-import com.centaurs.tmdbapp.ui.MovieActivity;
+import com.centaurs.tmdbapp.di.Injector;
 import com.centaurs.tmdbapp.ui.PresenterManager;
 import com.centaurs.tmdbapp.ui.moviedetail.MovieDetailFragment;
 import com.centaurs.tmdbapp.ui.networktroubles.NetworkConnectionTroublesFragment;
@@ -47,10 +47,10 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MovieActivity.get(this).getMovieComponent().inject(this);
+        Injector.getInstance().getMovieComponent().inject(this);
         imageViewMap = new HashMap<>();
         paginationAdapter = new PaginationAdapter(onItemClickListener, onNeedPosterListener, R.layout.item);
-        MovieActivity.get(this).getMovieComponent().inject(paginationAdapter);
+        Injector.getInstance().getMovieComponent().inject(paginationAdapter);
     }
 
     @Nullable

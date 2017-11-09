@@ -12,7 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.centaurs.tmdbapp.R;
-import com.centaurs.tmdbapp.ui.MovieActivity;
+import com.centaurs.tmdbapp.di.Injector;
 import com.centaurs.tmdbapp.ui.networktroubles.NetworkConnectionTroublesFragment;
 
 import javax.inject.Inject;
@@ -36,7 +36,7 @@ public class MovieDetailFragment extends Fragment implements IMovieDetailContrac
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MovieActivity.get(this).getMovieComponent().inject(this);
+        Injector.getInstance().getMovieComponent().inject(this);
     }
 
     @Nullable

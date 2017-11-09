@@ -19,7 +19,6 @@ public interface MovieComponent {
 
     @Subcomponent.Builder
     interface Builder {
-        MovieComponent.Builder presenterModule(PresenterModule presenterModuleModule);
         MovieComponent.Builder fragmentActivityModule(FragmentActivityModule fragmentActivityModule);
         MovieComponent build();
     }

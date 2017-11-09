@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.centaurs.tmdbapp.R;
-import com.centaurs.tmdbapp.ui.MovieActivity;
+import com.centaurs.tmdbapp.di.Injector;
 
 import java.io.Serializable;
 
@@ -36,7 +36,7 @@ public class NetworkConnectionTroublesFragment extends Fragment implements INetw
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MovieActivity.get(this).getMovieComponent().inject(this);
+        Injector.getInstance().getMovieComponent().inject(this);
         onRetryListener = (OnRetryListener) getArguments().getSerializable(RETRY_LISTENER_ARG);
     }
 
