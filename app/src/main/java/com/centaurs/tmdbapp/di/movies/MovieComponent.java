@@ -16,4 +16,11 @@ public interface MovieComponent {
     void inject(MoviesListFragment moviesListFragment);
     void inject(NetworkConnectionTroublesFragment networkConnectionTroublesFragment);
     void inject(PaginationAdapter paginationAdapter);
+
+    @Subcomponent.Builder
+    interface Builder {
+        MovieComponent.Builder presenterModule(PresenterModule presenterModuleModule);
+        MovieComponent.Builder fragmentActivityModule(FragmentActivityModule fragmentActivityModule);
+        MovieComponent build();
+    }
 }

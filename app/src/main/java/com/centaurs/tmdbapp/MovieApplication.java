@@ -10,7 +10,6 @@ import com.centaurs.tmdbapp.di.DaggerMovieAppComponent;
 import com.centaurs.tmdbapp.di.MovieAppComponent;
 import com.centaurs.tmdbapp.di.movies.FragmentActivityModule;
 import com.centaurs.tmdbapp.di.movies.MovieComponent;
-import com.centaurs.tmdbapp.di.movies.PresenterModule;
 
 public class MovieApplication extends Application {
     private MovieAppComponent movieAppComponent;
@@ -31,8 +30,9 @@ public class MovieApplication extends Application {
 
     public MovieComponent plusMovieComponent(FragmentActivity fragmentActivity){
         if (movieComponent == null){
-            movieComponent = movieAppComponent.plusMovieComponent(new PresenterModule()
-                    , new FragmentActivityModule(fragmentActivity));
+            movieComponent = movieAppComponent.movieComponentBuilder()
+                    .fragmentActivityModule(new FragmentActivityModule(fragmentActivity))
+                    .build();
         }
         return movieComponent;
     }
