@@ -4,6 +4,7 @@ package com.centaurs.tmdbapp.ui.login;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -11,18 +12,21 @@ import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.data.ImageLoader;
 import com.centaurs.tmdbapp.util.LoginHelper;
 import com.centaurs.tmdbapp.util.NetworkConnectionUtil;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.Status;
+import com.google.android.gms.common.api.Result;
+import com.google.android.gms.common.api.ResultCallback;
+
+import java.util.Map;
+
+import static com.centaurs.tmdbapp.util.LoginHelper.REQ_CODE;
 
 public class UserLoginPresenter implements IUserLoginContract.IPresenter {
     private final static String TAG = "UserLoginPresenter";
-    private final int RC_SIGN_IN = 0;
     private IUserLoginContract.IView view;
-    LoginHelper loginHelper;
-    ImageLoader imageLoader;
-    NetworkConnectionUtil networkConnectionUtil;
-    Context context;
+    private LoginHelper loginHelper;
+    private ImageLoader imageLoader;
+    private NetworkConnectionUtil networkConnectionUtil;
+    private Context context;
 
     public UserLoginPresenter (LoginHelper loginHelper, NetworkConnectionUtil networkConnectionUtil
             , ImageLoader imageLoader, Context context){
@@ -32,7 +36,16 @@ public class UserLoginPresenter implements IUserLoginContract.IPresenter {
         this.context = context;
     }
 
-    private LoginHelper.IConnectionFailedListener connectionFailedListener = new LoginHelper.IConnectionFailedListener() {
+    private LoginHelper.IResultListener resultListener = new LoginHelper.IResultListener() {
+        @Override
+        public void onResultReady(@Nullable Map<LoginHelper.ELoginResultKeys, String> resultMap) {
+            if (resultMap != null){
+                updateUIWhenSignIn(resultMap);
+            } else {
+                updateUIWhenSignOut();
+            }
+        }
+
         @Override
         public void onConnectionFailed(ConnectionResult connectionResult) {
             Log.e(TAG, connectionResult.getErrorMessage());
@@ -44,28 +57,15 @@ public class UserLoginPresenter implements IUserLoginContract.IPresenter {
         }
     };
 
-    private LoginHelper.ICheckCachedSignInListener checkCachedSignIn = new LoginHelper.ICheckCachedSignInListener() {
-        @Override
-        public void check(GoogleSignInResult result) {
-            handleSignInResult(result);
-        }
-    };
-
-    private LoginHelper.ISignOutListener signOutListener = new LoginHelper.ISignOutListener() {
-        @Override
-        public void onResult(Status status) {
-            updateUIWhenSignOut();
-        }
-    };
-
     @Override
     public void signInButtonClicked() {
-        view.showGoogleAccountDialog(loginHelper.getSignInIntent(), RC_SIGN_IN);
+        Intent intent = loginHelper.getIntentWhenSignIn();
+        view.startActivityForResult(intent, REQ_CODE);
     }
 
     @Override
     public void signOutButtonClicked() {
-        loginHelper.signOut(signOutListener);
+        loginHelper.signOut(signOutResultCallback);
     }
 
     @Override
@@ -75,16 +75,16 @@ public class UserLoginPresenter implements IUserLoginContract.IPresenter {
 
     @Override
     public void onReceivedLoginResult(int requestCode, Intent data) {
-        if (requestCode == RC_SIGN_IN){
-            handleSignInResult(loginHelper.getGoogleSignInResult(data));
+        if (requestCode == REQ_CODE){
+            updateUIWhenSignIn(loginHelper.getResult(data));
         }
     }
 
     @Override
     public void onViewResumed() {
         view.hideSomethingWrongMessage();
-        loginHelper.setConnectionFailedListener(connectionFailedListener);
-        loginHelper.checkCachedSignIn(checkCachedSignIn);
+        loginHelper.setResultListener(resultListener);
+        loginHelper.checkIfSignedInForResult();
     }
 
     @Override
@@ -97,19 +97,6 @@ public class UserLoginPresenter implements IUserLoginContract.IPresenter {
         view = null;
     }
 
-    private void handleSignInResult(GoogleSignInResult result) {
-        if (result.isSuccess()) {
-            view.setUsername(loginHelper.getUserName(result));
-            if(loginHelper.getPhotoUrlString(result) != null) {
-                imageLoader.loadImage(loginHelper.getPhotoUrlString(result), posterLoadingCallback);
-            }
-            view.hideSignInButton();
-            view.showSignOutButton();
-        } else {
-            updateUIWhenSignOut();
-        }
-    }
-
     private ImageLoader.IPosterLoadingCallback posterLoadingCallback = new ImageLoader.IPosterLoadingCallback() {
         @Override
         public void onReturnImageResult(String key, @Nullable Drawable drawable) {
@@ -119,10 +106,28 @@ public class UserLoginPresenter implements IUserLoginContract.IPresenter {
         }
     };
 
+    private void updateUIWhenSignIn(Map<LoginHelper.ELoginResultKeys, String> loginResultMap){
+        if (loginResultMap != null){
+            view.setUsername(loginResultMap.get(LoginHelper.ELoginResultKeys.NAME));
+            if(loginResultMap.get(LoginHelper.ELoginResultKeys.IMAGE_URL) != null) {
+                imageLoader.loadImage(loginResultMap.get(LoginHelper.ELoginResultKeys.IMAGE_URL), posterLoadingCallback);
+            }
+            view.hideSignInButton();
+            view.showSignOutButton();
+        }
+    }
+
     private void updateUIWhenSignOut() {
         view.setDefaultUsername();
         view.setDefaultProfileImage();
         view.hideSignOutButton();
         view.showSignInButton();
     }
+
+    private ResultCallback signOutResultCallback = new ResultCallback() {
+        @Override
+        public void onResult(@NonNull Result result) {
+            updateUIWhenSignOut();
+        }
+    };
 }

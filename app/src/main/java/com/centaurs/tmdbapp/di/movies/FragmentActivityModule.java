@@ -21,6 +21,7 @@ public class FragmentActivityModule {
     }
 
     @Provides
+    @MovieScope
     LoginHelper loginHelper(FragmentActivity fragmentActivity){
         return new LoginHelper(fragmentActivity);
     }

@@ -21,6 +21,7 @@ public interface IUserLoginContract {
         void goToNetworkConnectionTroublesFragment();
         void setSomethingWrongMessage(String message);
         void hideSomethingWrongMessage();
+        void startActivityForResult(Intent intent, int requestCode);
     }
 
     interface IPresenter extends IBasePresenter<IView>{

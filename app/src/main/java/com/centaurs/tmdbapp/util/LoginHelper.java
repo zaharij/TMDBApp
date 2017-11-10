@@ -1,10 +1,11 @@
 package com.centaurs.tmdbapp.util;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 
-import com.centaurs.tmdbapp.di.movies.MovieScope;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -13,94 +14,100 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 
-@MovieScope
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.centaurs.tmdbapp.util.LoginHelper.ELoginResultKeys.EMAIL;
+import static com.centaurs.tmdbapp.util.LoginHelper.ELoginResultKeys.IMAGE_URL;
+import static com.centaurs.tmdbapp.util.LoginHelper.ELoginResultKeys.NAME;
+
 public class LoginHelper implements GoogleApiClient.OnConnectionFailedListener {
+    public final static int REQ_CODE = 9001;
     private GoogleApiClient googleApiClient;
-    private IConnectionFailedListener connectionFailedListener;
+    private IResultListener resultListener;
 
-    public interface IConnectionFailedListener {
+    public interface IResultListener{
+        void onResultReady(@Nullable Map<ELoginResultKeys, String> loginResultMap);
         void onConnectionFailed(ConnectionResult connectionResult);
     }
 
-    public interface ICheckCachedSignInListener {
-        void check(GoogleSignInResult result);
+    public enum ELoginResultKeys{
+        NAME, EMAIL, IMAGE_URL
     }
 
-    public interface ISignOutListener{
-        void onResult(Status status);
-    }
-
-    public LoginHelper(FragmentActivity fragmentActivity){
-        configureAndBuildGoogleApiClient(fragmentActivity);
-    }
-
-    private void configureAndBuildGoogleApiClient(FragmentActivity fragmentActivity){
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
+    public LoginHelper(FragmentActivity fragmentActivity) {
+        GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions
+                .DEFAULT_SIGN_IN).requestEmail().build();
         googleApiClient = new GoogleApiClient.Builder(fragmentActivity)
                 .enableAutoManage(fragmentActivity, this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API,gso)
-                .build();
+                .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions).build();
     }
 
-    public void setConnectionFailedListener(IConnectionFailedListener connectionFailedListener) {
-        this.connectionFailedListener = connectionFailedListener;
-    }
-
-    private GoogleSignInAccount getGoogleSignInAccount(GoogleSignInResult result){
-        return result.getSignInAccount();
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        connectionFailedListener.onConnectionFailed(connectionResult);
-    }
-
-    public String getUserName(GoogleSignInResult result){
-        return getGoogleSignInAccount(result).getDisplayName();
-    }
-
-    public String getPhotoUrlString(GoogleSignInResult result){
-        GoogleSignInAccount googleSignInAccount = getGoogleSignInAccount(result);
-        if (googleSignInAccount.getPhotoUrl() != null){
-            return googleSignInAccount.getPhotoUrl().toString();
-        }
-        return null;
-    }
-
-    public GoogleSignInResult getGoogleSignInResult(Intent data){
-        return Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-    }
-
-    public Intent getSignInIntent(){
-        return Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
-    }
-
-    public void checkCachedSignIn(final ICheckCachedSignInListener checkCachedSignInListener){
+    public void checkIfSignedInForResult(){
         OptionalPendingResult<GoogleSignInResult> optionalPendingResult = Auth.GoogleSignInApi.silentSignIn(googleApiClient);
         if (optionalPendingResult.isDone()) {
-            GoogleSignInResult googleSignInResult = optionalPendingResult.get();
-            checkCachedSignInListener.check(googleSignInResult);
+            GoogleSignInResult result = optionalPendingResult.get();
+            resultListener.onResultReady(getLoginResultMap(result));
         } else {
             optionalPendingResult.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                 @Override
                 public void onResult(@NonNull GoogleSignInResult googleSignInResult) {
-                    checkCachedSignInListener.check(googleSignInResult);
+                    resultListener.onResultReady(getLoginResultMap(googleSignInResult));
                 }
             });
         }
     }
 
-    public void signOut(final ISignOutListener iSignOutListener){
-        Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(@NonNull Status status) {
-                        iSignOutListener.onResult(status);
-                    }
-                });
+    public void setResultListener(IResultListener resultListener) {
+        this.resultListener = resultListener;
+
+    }
+
+    public Intent getIntentWhenSignIn(){
+        return Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+    }
+
+    public void signOut(final ResultCallback resultCallback){
+        if(!googleApiClient.isConnected()){
+            googleApiClient.connect();
+            googleApiClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                @Override
+                public void onConnected(@Nullable Bundle bundle) {
+                    Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(resultCallback);
+                }
+
+                @Override
+                public void onConnectionSuspended(int i) {
+                    resultListener.onConnectionFailed(null);
+                }
+            });
+        } else Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(resultCallback);
+    }
+
+    public Map<ELoginResultKeys, String> getResult(Intent data){
+        GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+        return getLoginResultMap(result);
+    }
+
+    private Map<ELoginResultKeys, String> getLoginResultMap(GoogleSignInResult result){
+        Map<ELoginResultKeys, String> loginResultMap = null;
+        if (result.isSuccess()){
+            loginResultMap = new HashMap<>();
+            GoogleSignInAccount account = result.getSignInAccount();
+            if (account != null) {
+                loginResultMap.put(NAME, account.getDisplayName());
+                loginResultMap.put(EMAIL, account.getEmail());
+                if (account.getPhotoUrl() != null) {
+                    loginResultMap.put(IMAGE_URL, account.getPhotoUrl().toString());
+                }
+            }
+        }
+        return loginResultMap;
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        resultListener.onConnectionFailed(connectionResult);
     }
 }

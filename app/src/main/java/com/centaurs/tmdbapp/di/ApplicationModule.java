@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.centaurs.tmdbapp.util.NetworkConnectionUtil;
 
+import javax.inject.Singleton;
+
 import dagger.Module;
 import dagger.Provides;
 
@@ -11,7 +13,7 @@ import dagger.Provides;
 public class ApplicationModule {
     private Context context;
 
-    public ApplicationModule(Context context){
+    ApplicationModule(Context context){
         this.context = context;
     }
 
@@ -21,6 +23,7 @@ public class ApplicationModule {
     }
 
     @Provides
+    @Singleton
     NetworkConnectionUtil networkConnectionUtil(Context context){
         return new NetworkConnectionUtil(context);
     }
