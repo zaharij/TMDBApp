@@ -27,15 +27,21 @@ class VideoLoader implements Runnable{
     private int movieId;
     private int startId;
     private String movieTitle;
+    private VideoLoaderService.IProgressListener progressListener;
+    private int currentProgress;
+    private long whenStartedMillis;
 
-    VideoLoader (MoviesApi moviesApi, FileLoader fileLoader, YoutubeApi youtubeApi
-            , VideoLoaderService.IVideoLoaderCallback videoLoaderCallback, int movieId, int startId){
+    VideoLoader (VideoLoaderService.IProgressListener progressListener, MoviesApi moviesApi
+            , FileLoader fileLoader, YoutubeApi youtubeApi
+            , VideoLoaderService.IVideoLoaderCallback videoLoaderCallback, int movieId, int startId, long whenStartedMillis){
+        this.progressListener = progressListener;
         this.moviesApi = moviesApi;
         this.fileLoader = fileLoader;
         this.youtubeApi = youtubeApi;
         this.videoLoaderCallback = videoLoaderCallback;
         this.movieId = movieId;
         this.startId = startId;
+        this.whenStartedMillis = whenStartedMillis;
         videoMap = new HashMap<>();
     }
 
@@ -80,8 +86,7 @@ class VideoLoader implements Runnable{
         @Override
         public void onResponse(Uri uri) {
             if (uri != null){
-                Log.d(TAG, uri.toString());
-                fileLoader.downloadFile(videoFileLoaderCallback, uri.toString(), movieTitle);
+                fileLoader.downloadFile(videoFileLoaderCallback, progressLoadListener, uri.toString(), movieTitle);
             } else {
                 videoLoaderCallback.onResult(movieTitle, false, startId);
             }
@@ -106,4 +111,18 @@ class VideoLoader implements Runnable{
             videoLoaderCallback.onResult(movieTitle, false, startId);
         }
     };
+
+    private FileLoader.IProgressListener progressLoadListener = new FileLoader.IProgressListener() {
+        @Override
+        public void onProgressChanged(long max, long progress) {
+            if ((getProgressPercents(max, progress) - currentProgress) >= 1){
+                currentProgress = getProgressPercents(max, progress);
+                progressListener.onProgressChanged(movieTitle, startId, currentProgress, whenStartedMillis);
+            }
+        }
+    };
+
+    private int getProgressPercents(long max, long progress){
+        return (int) ((progress * 100) / max);
+    }
 }

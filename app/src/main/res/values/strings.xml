@@ -19,6 +19,8 @@
     <string name="downloading_message">Downloading</string>
     <string name="downloaded_message">Downloaded</string>
     <string name="not_downloaded_message">Downloading Failed</string>
+    <string name="preparing_message">Preparing</string>
+    <string name="wait_message">Wait Please...</string>
     <string name="retry_connection_button">Retry</string>
 
     <string name="detail_poster_image_description">Big poster</string>

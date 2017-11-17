@@ -37,6 +37,7 @@ import javax.inject.Inject;
 import static com.centaurs.tmdbapp.ui.movieslist.PaginationAdapter.ITEM_SPAN_SIZE;
 
 public class MoviesListFragment extends Fragment implements IMoviesListContract.IView, MovieActivity.OnBackPressedListener {
+    public static final String MOVIES_LIST_FRAGMENT_EXTRA = "MoviesListFragmentExtra";
     private static final int SCROLLING_DURATION = 1000;
     private PaginationAdapter paginationAdapter;
     @Inject

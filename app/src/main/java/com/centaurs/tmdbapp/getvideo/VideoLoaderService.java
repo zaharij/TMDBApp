@@ -14,6 +14,8 @@ import com.centaurs.tmdbapp.data.YoutubeApi;
 import com.centaurs.tmdbapp.data.api.MoviesApi;
 import com.centaurs.tmdbapp.data.fileload.FileLoader;
 import com.centaurs.tmdbapp.di.Injector;
+import com.centaurs.tmdbapp.ui.MovieActivity;
+import com.centaurs.tmdbapp.ui.movieslist.MoviesListFragment;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,6 +26,7 @@ import javax.inject.Inject;
 public class VideoLoaderService extends Service {
     public static final String MOVIE_ID_SERVICE_EXTRA = "MovieIdService";
     private final int THREAD_POOL_SIZE = 5;
+    private final int MAX_PROGRESS = 100;
     private ExecutorService executorService;
     private NotificationManager notificationManager;
     private AtomicInteger startIdsCounter;
@@ -36,7 +39,11 @@ public class VideoLoaderService extends Service {
     YoutubeApi youtubeApi;
 
     interface IVideoLoaderCallback{
-        void onResult(String movieTitle, boolean isSuccess, int startId);
+        void onResult(String movieTitle, Boolean isSuccess, int startId);
+    }
+
+    interface IProgressListener{
+        void onProgressChanged(String movieTitle, int id, int progress, long when);
     }
 
     @Override
@@ -56,41 +63,69 @@ public class VideoLoaderService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        notifyUser(this.getResources().getString(R.string.wait_message), false, startId, 0, 0);
         startIdsCounter.incrementAndGet();
         lastStartId = lastStartId < startId ? startId : lastStartId;
-        executorService.execute(new VideoLoader(moviesApi, fileLoader, youtubeApi
-                , videoLoaderCallback, intent.getExtras().getInt(MOVIE_ID_SERVICE_EXTRA), startId));
+        executorService.execute(new VideoLoader(progressListener, moviesApi, fileLoader, youtubeApi
+                , videoLoaderCallback, intent.getExtras().getInt(MOVIE_ID_SERVICE_EXTRA), startId, System.currentTimeMillis()));
         return START_REDELIVER_INTENT;
     }
 
     private IVideoLoaderCallback videoLoaderCallback = new IVideoLoaderCallback() {
         @Override
-        public void onResult(String movieTitle, boolean isSuccess, int startId) {
-            sendNotification(movieTitle, isSuccess, startId);
+        public void onResult(String movieTitle, Boolean isSuccess, int startId) {
             if (startId < lastStartId) {
                 stopSelf(startId);
             }
             if (startIdsCounter.decrementAndGet() == 0){
                 stopSelf(lastStartId);
             }
+            notifyUser(movieTitle, isSuccess, startId, MAX_PROGRESS, 0);
         }
     };
 
-    private void sendNotification(String movieTitle, boolean isSuccess, int id) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.parse(FileLoader.DOWNLOAD_FILE_DIRECTORY.concat("/").concat(movieTitle)), "video/*");
-        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
-        Notification.Builder builder = new Notification.Builder(this)
-                .setSmallIcon(R.drawable.ic_download_movies)
-                .setContentText(movieTitle)
-                .setContentIntent(pIntent)
-                .setAutoCancel(true);
-        if (isSuccess){
-            builder.setContentTitle(this.getResources().getString(R.string.downloaded_message));
-        } else {
-            builder.setContentTitle(this.getResources().getString(R.string.not_downloaded_message));
+    private IProgressListener progressListener = new IProgressListener() {
+        @Override
+        public void onProgressChanged(String movieTitle, int id, int progress, long when) {
+            notifyUser(movieTitle, id, progress, when);
         }
-        Notification notification = builder.build();
-        notificationManager.notify(id, notification);
+    };
+
+    private void notifyUser(String movieTitle, int id, int progress, long when){
+        notifyUser(movieTitle, null, id, progress, when);
+    }
+
+    private void notifyUser(final String movieTitle, final Boolean isSuccess, final int id, final int progress, long when){
+        Notification.Builder builder = new Notification.Builder(getApplicationContext())
+                .setSmallIcon(R.drawable.ic_download_movies)
+                .setContentText(movieTitle);
+        if (when > 0){
+            builder.setWhen(when);
+        }
+        if (progress == 0){
+            builder.setProgress(0, 0, true);
+            builder.setContentTitle(getApplicationContext().getResources().getString(R.string.preparing_message));
+        } else if (progress < MAX_PROGRESS){
+            builder.setProgress(MAX_PROGRESS, progress, false);
+            builder.setContentTitle(getApplicationContext().getResources().getString(R.string.downloading_message));
+        } else {
+            if (isSuccess != null) {
+                Intent intent;
+                if (isSuccess) {
+                    intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(Uri.parse(FileLoader.DOWNLOAD_FILE_DIRECTORY.concat("/").concat(movieTitle)), "video/*");
+                    builder.setContentTitle(getApplicationContext().getResources()
+                            .getString(R.string.downloaded_message)).setAutoCancel(true);
+                } else {
+                    intent = new Intent(getApplicationContext(), MovieActivity.class);
+                    intent.putExtra(MovieActivity.START_FRAGMENT_EXTRA, MoviesListFragment.MOVIES_LIST_FRAGMENT_EXTRA);
+                    builder.setContentTitle(getApplicationContext().getResources()
+                            .getString(R.string.not_downloaded_message)).setAutoCancel(true);
+                }
+                PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+                builder.setContentIntent(pIntent);
+            }
+        }
+        notificationManager.notify(id, builder.build());
     }
 }

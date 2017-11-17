@@ -12,9 +12,13 @@ import android.support.v7.app.AppCompatActivity;
 import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.di.Injector;
 import com.centaurs.tmdbapp.ui.login.UserLoginFragment;
+import com.centaurs.tmdbapp.ui.movieslist.MoviesListFragment;
+
+import static com.centaurs.tmdbapp.ui.movieslist.MoviesListFragment.MOVIES_LIST_FRAGMENT_EXTRA;
 
 public class MovieActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST = 100;
+    public static final String START_FRAGMENT_EXTRA = "MovieActivity";
 
     public interface OnBackPressedListener{
         boolean handleOnnBackPressedForResult();
@@ -34,7 +38,11 @@ public class MovieActivity extends AppCompatActivity {
 
         Injector.getInstance().plusMovieComponent(this);
 
-        if (savedInstanceState == null){
+        if (getIntent().getStringExtra(START_FRAGMENT_EXTRA) != null
+                && getIntent().getStringExtra(START_FRAGMENT_EXTRA).equals(MOVIES_LIST_FRAGMENT_EXTRA)){
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, new MoviesListFragment()).commit();
+        } else if (savedInstanceState == null){
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_container, new UserLoginFragment()).commit();
         }
