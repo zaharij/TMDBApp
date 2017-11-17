@@ -10,7 +10,9 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.centaurs.tmdbapp.data.api.MoviesApi;
 import com.centaurs.tmdbapp.data.models.Configuration;
+import com.centaurs.tmdbapp.data.util.IDataCallback;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +40,7 @@ public class ImageLoader {
         void onReturnImageResult(String key, @Nullable Drawable drawable);
     }
 
-    private MoviesApi.IDataCallback<Configuration> baseOriginalPosterUrlCallback = new MoviesApi.IDataCallback<Configuration>() {
+    private IDataCallback<Configuration> baseOriginalPosterUrlCallback = new IDataCallback<Configuration>() {
         @Override
         public void onResponse(Configuration response) {
             String basePosterUrl = response.getImages().getBaseUrl();
@@ -57,7 +59,7 @@ public class ImageLoader {
         }
     };
 
-    private MoviesApi.IDataCallback<Configuration> baseMinPosterUrlCallback = new MoviesApi.IDataCallback<Configuration>() {
+    private IDataCallback<Configuration> baseMinPosterUrlCallback = new IDataCallback<Configuration>() {
         @Override
         public void onResponse(Configuration response) {
             String basePosterUrl = response.getImages().getBaseUrl();

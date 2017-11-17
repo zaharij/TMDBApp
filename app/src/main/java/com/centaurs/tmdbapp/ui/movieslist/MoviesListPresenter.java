@@ -1,14 +1,17 @@
 package com.centaurs.tmdbapp.ui.movieslist;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.data.ImageLoader;
-import com.centaurs.tmdbapp.data.MoviesApi;
+import com.centaurs.tmdbapp.data.api.MoviesApi;
 import com.centaurs.tmdbapp.data.models.Movie;
 import com.centaurs.tmdbapp.data.models.TopRatedMovies;
+import com.centaurs.tmdbapp.data.util.IDataCallback;
+import com.centaurs.tmdbapp.getvideo.VideoLoaderService;
 import com.centaurs.tmdbapp.util.NetworkConnectionUtil;
 
 import org.jetbrains.annotations.NotNull;
@@ -16,19 +19,23 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.centaurs.tmdbapp.getvideo.VideoLoaderService.MOVIE_ID_SERVICE_EXTRA;
+
 public class MoviesListPresenter implements IMoviesListContract.IPresenter {
     private final String TAG = "MoviesListPresenter";
     private final int PAGE_START = 1;
+    private final int SELECT_MOVIES_MAX_NUMBER = 10;
     private IMoviesListContract.IView view;
     private boolean isLoading;
     private boolean isLastPage;
     private int currentPage = PAGE_START;
     private List<Movie> movies;
+    private List<Integer> selectedMoviesIdsList;
     private boolean isLoadingAdded;
-    NetworkConnectionUtil networkConnectionUtil;
-    MoviesApi moviesApi;
-    ImageLoader imageLoader;
-    Context context;
+    private NetworkConnectionUtil networkConnectionUtil;
+    private MoviesApi moviesApi;
+    private ImageLoader imageLoader;
+    private Context context;
 
     public MoviesListPresenter (NetworkConnectionUtil networkConnectionUtil, MoviesApi moviesApi
             , ImageLoader imageLoader, Context context){
@@ -37,6 +44,7 @@ public class MoviesListPresenter implements IMoviesListContract.IPresenter {
         this.imageLoader = imageLoader;
         this.context = context;
         movies = new ArrayList<>();
+        selectedMoviesIdsList = new ArrayList<>();
     }
 
     @Override
@@ -49,8 +57,8 @@ public class MoviesListPresenter implements IMoviesListContract.IPresenter {
         view = null;
     }
 
-    private MoviesApi.IDataCallback<TopRatedMovies> loadFirstPageCallback
-            = new MoviesApi.IDataCallback<TopRatedMovies>() {
+    private IDataCallback<TopRatedMovies> loadFirstPageCallback
+            = new IDataCallback<TopRatedMovies>() {
         @Override
         public void onResponse(@NotNull TopRatedMovies response) {
             view.hideMainProgress();
@@ -69,8 +77,8 @@ public class MoviesListPresenter implements IMoviesListContract.IPresenter {
         }
     };
 
-    private MoviesApi.IDataCallback<TopRatedMovies> loadNextPageCallback
-            = new MoviesApi.IDataCallback<TopRatedMovies>() {
+    private IDataCallback<TopRatedMovies> loadNextPageCallback
+            = new IDataCallback<TopRatedMovies>() {
         @Override
         public void onResponse(@NotNull TopRatedMovies response) {
             view.hideTroublesLoadingNextPageText();
@@ -105,8 +113,10 @@ public class MoviesListPresenter implements IMoviesListContract.IPresenter {
 
     @Override
     public void onViewResumed() {
+        view.hideToolbar();
         if (networkConnectionUtil.isNetworkConnected()){
             view.setResultListToAdapter(movies);
+            view.setSelectedMoviesIdsListToAdapter(selectedMoviesIdsList);
             if (movies.size() == 0){
                 loadFirstPage();
             }
@@ -154,7 +164,61 @@ public class MoviesListPresenter implements IMoviesListContract.IPresenter {
 
     @Override
     public void onItemClicked(int movieId) {
-        view.goToMovieDetailFragment(movieId);
+        if (selectedMoviesIdsList.isEmpty()){
+            view.goToMovieDetailFragment(movies.get(movieId).getId());
+        } else {
+            handleTapAfterLongTap(movieId);
+        }
+    }
+
+    @Override
+    public void onItemLongClicked(int movieId) {
+        view.showToolbar();
+        handleTapAfterLongTap(movieId);
+    }
+
+    private void handleTapAfterLongTap(int movieId) {
+        if (!selectedMoviesIdsList.contains(movieId)){
+            if (selectedMoviesIdsList.size() < SELECT_MOVIES_MAX_NUMBER){
+                selectedMoviesIdsList.add(movieId);
+            } else {
+                view.showToast(context.getString(R.string.selected_movies_maximum_number_message));
+                return;
+            }
+        } else {
+            selectedMoviesIdsList.remove(Integer.valueOf(movieId));
+        }
+        if (selectedMoviesIdsList.size() > 0){
+            view.setSelectedMoviesNumber(String.valueOf(selectedMoviesIdsList.size()));
+        } else {
+            view.hideToolbar();
+        }
+        view.notifyAdapterDataSetChanged();
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        if (!selectedMoviesIdsList.isEmpty()){
+            nullSelectedMovies();
+            return true;
+        }
+        return false;
+    }
+
+    private void nullSelectedMovies() {
+        selectedMoviesIdsList.clear();
+        view.hideToolbar();
+        view.notifyAdapterDataSetChanged();
+    }
+
+    @Override
+    public void onSelectedVideosClicked() {
+        for (Integer movieIndex: selectedMoviesIdsList){
+            context.startService(new Intent(context, VideoLoaderService.class)
+                    .putExtra(MOVIE_ID_SERVICE_EXTRA, movies.get(movieIndex).getId()));
+        }
+        nullSelectedMovies();
+        view.showToast(context.getString(R.string.downloading_message));
     }
 
     private void add(Movie movie) {
@@ -164,7 +228,7 @@ public class MoviesListPresenter implements IMoviesListContract.IPresenter {
     }
 
     private void addAll(List<Movie> moveResults) {
-        int startPosition = movies.size()+1;
+        int startPosition = movies.size() + 1;
         movies.addAll(moveResults);
         view.notifyItemInserted(isLoadingAdded, startPosition, moveResults.size()+1);
     }

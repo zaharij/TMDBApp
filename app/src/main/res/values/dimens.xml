@@ -28,4 +28,7 @@
     <dimen name="network_troubles_message_margin">8dp</dimen>
     <dimen name="loading_items_progress_padding">18dp</dimen>
     <dimen name="loading_big_poster_padding">12dp</dimen>
+    <dimen name="selected_movies_number_notification_padding">2dp</dimen>
+    <dimen name="icon_movies_padding">5dp</dimen>
+    <dimen name="selected_movies_icon_margin">20dp</dimen>
 </resources>

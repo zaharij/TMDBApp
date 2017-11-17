@@ -28,9 +28,11 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     static final int ITEM_SPAN_SIZE = 2;
     private static final int LOADING_SPAN_SIZE = 1;
     private PaginationAdapter.OnItemClickListener onItemClickListener;
+    private PaginationAdapter.OnItemLongClickListener onItemLongClickListener;
     private OnNeedPosterListener onNeedPosterListener;
     private int itemViewRes;
     private List<Movie> movies;
+    private List<Integer> selectedMoviesIdsList;
     private boolean isLoadingAdded = false;
     @Inject
     Context context;
@@ -38,20 +40,30 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     interface OnItemClickListener{
         void onItemClick(int movieId);
     }
+
+    interface OnItemLongClickListener{
+        void onItemLongClick(int movieId);
+    }
     
     interface OnNeedPosterListener {
         void onNeedPoster(ImageView imageView, String posterPath);
     }
 
     PaginationAdapter(PaginationAdapter.OnItemClickListener onItemClickListener
+            , PaginationAdapter.OnItemLongClickListener onItemLongClickListener
             , OnNeedPosterListener onNeedPosterListener, int itemViewRes) {
         this.onNeedPosterListener = onNeedPosterListener;
         this.itemViewRes = itemViewRes;
         this.onItemClickListener = onItemClickListener;
+        this.onItemLongClickListener = onItemLongClickListener;
     }
 
     void setMovies(List<Movie> movies) {
         this.movies = movies;
+    }
+
+    void setSelectedMoviesIdsList(List<Integer> selectedMoviesIdsList){
+        this.selectedMoviesIdsList = selectedMoviesIdsList;
     }
 
     @Override
@@ -74,10 +86,19 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private RecyclerView.ViewHolder getViewHolder(ViewGroup parent, LayoutInflater inflater) {
         View viewToAdd = inflater.inflate(itemViewRes, parent, false);
         final MovieViewHolder viewHolder = new MovieViewHolder(viewToAdd);
+        setItemBackgroundDefault( viewHolder.getItemView());
+        viewHolder.getItemView().setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                onItemLongClickListener.onItemLongClick(viewHolder.getLayoutPosition());;
+                return true;
+            }
+        });
+
         viewHolder.getItemView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onItemClickListener.onItemClick(movies.get(viewHolder.getLayoutPosition()).getId());
+                onItemClickListener.onItemClick(viewHolder.getLayoutPosition());
             }
         });
         return viewHolder;
@@ -89,6 +110,12 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         switch (getItemViewType(position)) {
             case ITEM:
                 final MovieViewHolder movieViewHolder = (MovieViewHolder) holder;
+                if (!selectedMoviesIdsList.isEmpty() && selectedMoviesIdsList.contains(position)){
+                    setItemBackgroundSelected(movieViewHolder.getItemView());
+                } else {
+                    setItemBackgroundDefault(movieViewHolder.getItemView());
+                }
+
                 if (movie.getTitle() != null){
                     movieViewHolder.setTitle(movie.getTitle());
                 }
@@ -100,8 +127,8 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     e.printStackTrace();
                 }
                 if (movie.getReleaseDate() != null){
-                    movieViewHolder.setAdditionalInfo(context
-                            .getString(R.string.year_and_language, yearString, movie.getOriginalLanguage().toUpperCase()));
+                    movieViewHolder.setAdditionalInfo(context.getString(R.string.year_and_language
+                            , yearString, movie.getOriginalLanguage().toUpperCase()));
                 }
                 if (movie.getVoteAverage() != null){
                     movieViewHolder.setRating(String.valueOf(movie.getVoteAverage()));
@@ -111,6 +138,14 @@ public class PaginationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             case LOADING:
                 break;
         }
+    }
+
+    private void setItemBackgroundDefault(View itemView){
+        itemView.setBackgroundColor(context.getResources().getColor(R.color.item_movie_card_background));
+    }
+
+    private void setItemBackgroundSelected(View itemView){
+        itemView.setBackgroundColor(context.getResources().getColor(R.color.selected_item_background));
     }
 
     private GridLayoutManager.SpanSizeLookup onSpanSizeLookup = new GridLayoutManager.SpanSizeLookup() {

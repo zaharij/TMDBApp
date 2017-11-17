@@ -1,8 +1,11 @@
-package com.centaurs.tmdbapp.data;
+package com.centaurs.tmdbapp.data.api;
 
 import com.centaurs.tmdbapp.data.models.Configuration;
 import com.centaurs.tmdbapp.data.models.Movie;
+import com.centaurs.tmdbapp.data.models.MoviesTrailer;
 import com.centaurs.tmdbapp.data.models.TopRatedMovies;
+import com.centaurs.tmdbapp.data.util.IDataCallback;
+import com.centaurs.tmdbapp.data.util.RetrofitClient;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -19,17 +22,12 @@ import static com.centaurs.tmdbapp.data.constants.DataConstants.LANGUAGE_EN;
 public class MoviesApi {
     private IMoviesApi api;
 
-    public interface IDataCallback<T> {
-        void onResponse(T response);
-        void onFailure(Throwable throwable);
-    }
-
     public MoviesApi() {
         api = RetrofitClient.getRetrofitClient().create(IMoviesApi.class);
     }
 
-    void loadMoviesConfiguration(final IDataCallback<Configuration> baseImageUrlCallback){
-        getConfiguration().enqueue(new Callback<Configuration>() {
+    public void loadMoviesConfiguration(final IDataCallback<Configuration> baseImageUrlCallback){
+        api.getMovieConfiguration(API_KEY).enqueue(new Callback<Configuration>() {
             @Override
             public void onResponse(@NotNull Call<Configuration> call, @NotNull Response<Configuration> response) {
                 baseImageUrlCallback.onResponse(response.body());
@@ -42,7 +40,7 @@ public class MoviesApi {
     }
 
     public void loadPage(final IDataCallback<TopRatedMovies> dataCallback, int currentPage){
-        getTopRatedMovies(currentPage).enqueue(new Callback<TopRatedMovies>() {
+        api.getTopRatedMovies(API_KEY, LANGUAGE_EN, currentPage).enqueue(new Callback<TopRatedMovies>() {
             @Override
             public void onResponse(@NotNull Call<TopRatedMovies> call, @NotNull Response<TopRatedMovies> response) {
                 dataCallback.onResponse(response.body());
@@ -55,7 +53,7 @@ public class MoviesApi {
     }
 
     public void loadMovie(final IDataCallback<Movie> dataCallback, int movieId){
-        getMovieById(movieId).enqueue(new Callback<Movie>() {
+        api.getMovieById(movieId, API_KEY, LANGUAGE_EN).enqueue(new Callback<Movie>() {
             @Override
             public void onResponse(@NotNull Call<Movie> call, @NotNull Response<Movie> response) {
                 dataCallback.onResponse(response.body());
@@ -68,15 +66,17 @@ public class MoviesApi {
         });
     }
 
-    private Call<Movie> getMovieById(int movieId){
-        return api.getMovieById(movieId, API_KEY, LANGUAGE_EN);
-    }
+    public void loadMovieTrailer(final IDataCallback<MoviesTrailer> dataCallback, int movieId){
+        api.getMovieTrailer(movieId, API_KEY, LANGUAGE_EN).enqueue(new Callback<MoviesTrailer>() {
+            @Override
+            public void onResponse(@NotNull Call<MoviesTrailer> call, @NotNull Response<MoviesTrailer> response) {
+                dataCallback.onResponse(response.body());
+            }
 
-    private Call<TopRatedMovies> getTopRatedMovies(int currentPage) {
-        return api.getTopRatedMovies(API_KEY, LANGUAGE_EN, currentPage);
-    }
-
-    private Call<Configuration> getConfiguration(){
-        return api.getMovieConfiguration(API_KEY);
+            @Override
+            public void onFailure(@NotNull Call<MoviesTrailer> call, @NotNull Throwable t) {
+                dataCallback.onFailure(t);
+            }
+        });
     }
 }

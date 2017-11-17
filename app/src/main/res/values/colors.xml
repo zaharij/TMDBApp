@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#433582</color>
     <color name="colorAccent">#5F4BB6</color>
 
+    <color name="selected_item_background">#b1a1ef</color>
     <color name="movie_detail_text">#fbfafa</color>
     <color name="network_troubles_message">#ffffff</color>
     <color name="button_text">#fcfcfc</color>
@@ -11,4 +12,5 @@
     <color name="item_movie_card_background">#ffffff</color>
     <color name="app_background">#000000</color>
     <color name="message_background">#84020202</color>
+    <color name="movies_selected_number_notification">#f78809</color>
 </resources>
