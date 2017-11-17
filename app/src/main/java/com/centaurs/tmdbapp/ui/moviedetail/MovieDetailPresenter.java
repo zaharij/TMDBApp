@@ -7,8 +7,9 @@ import android.util.Log;
 
 import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.data.ImageLoader;
-import com.centaurs.tmdbapp.data.MoviesApi;
+import com.centaurs.tmdbapp.data.api.MoviesApi;
 import com.centaurs.tmdbapp.data.models.Movie;
+import com.centaurs.tmdbapp.data.util.IDataCallback;
 import com.centaurs.tmdbapp.util.NetworkConnectionUtil;
 
 import java.text.ParseException;
@@ -23,10 +24,10 @@ import static com.centaurs.tmdbapp.util.Constants.WORDS_DIVISOR;
 public class MovieDetailPresenter implements IMovieDetailContract.IPresenter {
     private final String TAG = "MovieDetailPresenter";
     private IMovieDetailContract.IView view;
-    NetworkConnectionUtil networkConnectionUtil;
-    MoviesApi moviesApi;
-    ImageLoader imageLoader;
-    Context context;
+    private NetworkConnectionUtil networkConnectionUtil;
+    private MoviesApi moviesApi;
+    private ImageLoader imageLoader;
+    private Context context;
 
     public MovieDetailPresenter (NetworkConnectionUtil networkConnectionUtil, MoviesApi moviesApi
             , ImageLoader imageLoader, Context context){
@@ -50,7 +51,7 @@ public class MovieDetailPresenter implements IMovieDetailContract.IPresenter {
     public void onViewResumed(final int movieId) {
         if (networkConnectionUtil.isNetworkConnected()){
             view.showPosterLoadingProgress();
-            moviesApi.loadMovie(new MoviesApi.IDataCallback<Movie>() {
+            moviesApi.loadMovie(new IDataCallback<Movie>() {
                 @Override
                 public void onResponse(final Movie movie) {
                     view.setGenres(context.getString(R.string.genre).concat(getGenres(movie)));
@@ -86,11 +87,13 @@ public class MovieDetailPresenter implements IMovieDetailContract.IPresenter {
     private ImageLoader.IPosterLoadingCallback posterLoadingCallback = new ImageLoader.IPosterLoadingCallback() {
         @Override
         public void onReturnImageResult(String key, @Nullable Drawable drawable) {
-            view.hidePosterLoadingProgress();
-            if(drawable != null){
-                view.setPoster(drawable);
-            } else {
-                view.showSomethingWrongImage();
+            if (view != null){
+                view.hidePosterLoadingProgress();
+                if(drawable != null){
+                    view.setPoster(drawable);
+                } else {
+                    view.showSomethingWrongImage();
+                }
             }
         }
     };

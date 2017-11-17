@@ -1,6 +1,7 @@
 package com.centaurs.tmdbapp.di;
 
 import com.centaurs.tmdbapp.di.movies.MovieComponent;
+import com.centaurs.tmdbapp.getvideo.VideoLoaderService;
 
 import javax.inject.Singleton;
 
@@ -10,4 +11,6 @@ import dagger.Component;
 @Component(modules = {ApplicationModule.class, MovieDbModule.class})
 public interface MovieAppComponent {
     MovieComponent.Builder movieComponentBuilder();
+
+    void inject(VideoLoaderService videoLoaderService);
 }

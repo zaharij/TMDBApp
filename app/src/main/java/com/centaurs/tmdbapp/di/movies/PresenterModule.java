@@ -3,7 +3,7 @@ package com.centaurs.tmdbapp.di.movies;
 import android.content.Context;
 
 import com.centaurs.tmdbapp.data.ImageLoader;
-import com.centaurs.tmdbapp.data.MoviesApi;
+import com.centaurs.tmdbapp.data.api.MoviesApi;
 import com.centaurs.tmdbapp.ui.login.IUserLoginContract;
 import com.centaurs.tmdbapp.ui.login.UserLoginPresenter;
 import com.centaurs.tmdbapp.ui.moviedetail.IMovieDetailContract;

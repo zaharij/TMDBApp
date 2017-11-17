@@ -3,21 +3,27 @@ package com.centaurs.tmdbapp.ui.movieslist;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.centaurs.tmdbapp.R;
 import com.centaurs.tmdbapp.data.models.Movie;
 import com.centaurs.tmdbapp.di.Injector;
+import com.centaurs.tmdbapp.ui.MovieActivity;
 import com.centaurs.tmdbapp.ui.PresenterManager;
 import com.centaurs.tmdbapp.ui.moviedetail.MovieDetailFragment;
 import com.centaurs.tmdbapp.ui.networktroubles.NetworkConnectionTroublesFragment;
@@ -30,14 +36,15 @@ import javax.inject.Inject;
 
 import static com.centaurs.tmdbapp.ui.movieslist.PaginationAdapter.ITEM_SPAN_SIZE;
 
-public class MoviesListFragment extends Fragment implements IMoviesListContract.IView{
+public class MoviesListFragment extends Fragment implements IMoviesListContract.IView, MovieActivity.OnBackPressedListener {
     private static final int SCROLLING_DURATION = 1000;
     private PaginationAdapter paginationAdapter;
     @Inject
     IMoviesListContract.IPresenter presenter;
     private ProgressBar moviesListProgress;
     private Map<String, ImageView> imageViewMap;
-    private TextView troublesLoadingNextPageTextView;
+    private TextView troublesLoadingNextPageTextView, selectedMoviesNumberTextView;
+    private Toolbar toolbar;
 
     //not for data storage, only for receiving data from the presenter
     private int totalPages;
@@ -49,14 +56,27 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
         super.onCreate(savedInstanceState);
         Injector.getInstance().getMovieComponent().inject(this);
         imageViewMap = new HashMap<>();
-        paginationAdapter = new PaginationAdapter(onItemClickListener, onNeedPosterListener, R.layout.item);
+        paginationAdapter = new PaginationAdapter(onItemClickListener, onItemLongClickListener
+                , onNeedPosterListener, R.layout.item);
         Injector.getInstance().getMovieComponent().inject(paginationAdapter);
     }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_movies_list, container, false);
+
+        View selectedMoviesView = inflater.inflate(R.layout.badge_menu_item, container, false);
+
+        toolbar = view.findViewById(R.id.toolbar);
+        LinearLayout layoutToolbar = toolbar.findViewById(R.id.toolbar_item_container);
+
+        selectedMoviesNumberTextView = selectedMoviesView.findViewById(R.id.actionbar_notification_text_view);
+        layoutToolbar.addView(selectedMoviesView);
+
+        RelativeLayout selectedVideosLayout = selectedMoviesView.findViewById(R.id.selected_videos_layout);
+        selectedVideosLayout.setOnClickListener(clickListener);
+
         moviesListProgress = view.findViewById(R.id.movies_list_progress);
         hideMainProgress();
         troublesLoadingNextPageTextView = view.findViewById(R.id.item_progress_troubles_text_view);
@@ -103,10 +123,28 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
         return view;
     }
 
+    private View.OnClickListener clickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()){
+                case R.id.selected_videos_layout:
+                    presenter.onSelectedVideosClicked();
+                    break;
+            }
+        }
+    };
+
     private PaginationAdapter.OnItemClickListener onItemClickListener = new PaginationAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int movieId) {
             presenter.onItemClicked(movieId);
+        }
+    };
+
+    private PaginationAdapter.OnItemLongClickListener onItemLongClickListener = new PaginationAdapter.OnItemLongClickListener() {
+        @Override
+        public void onItemLongClick(int movieId) {
+            presenter.onItemLongClicked(movieId);
         }
     };
 
@@ -131,11 +169,10 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         PresenterManager.getInstance().savePresenter(presenter, outState);
     }
-
 
     @Override
     public void hideMainProgress() {
@@ -190,6 +227,11 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     }
 
     @Override
+    public void setSelectedMoviesIdsListToAdapter(List<Integer> selectedMoviesIdsList) {
+        paginationAdapter.setSelectedMoviesIdsList(selectedMoviesIdsList);
+    }
+
+    @Override
     public void notifyItemInserted(boolean isLoadingAdded, int startPosition, int position) {
         paginationAdapter.notifyInserted(isLoadingAdded, startPosition, position);
     }
@@ -210,6 +252,31 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
         troublesLoadingNextPageTextView.setVisibility(View.GONE);
     }
 
+    @Override
+    public void notifyAdapterDataSetChanged() {
+        paginationAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void showToolbar() {
+        toolbar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void hideToolbar() {
+        toolbar.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void setSelectedMoviesNumber(String numberStr) {
+        selectedMoviesNumberTextView.setText(numberStr);
+    }
+
+    @Override
+    public void showToast(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
     private NetworkConnectionTroublesFragment.OnRetryListener onRetryListener
             = new NetworkConnectionTroublesFragment.OnRetryListener() {
         @Override
@@ -217,4 +284,9 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
             return new MoviesListFragment();
         }
     };
+
+    @Override
+    public boolean handleOnnBackPressedForResult() {
+        return presenter.onBackPressed();
+    }
 }

@@ -45,4 +45,8 @@ public class Injector {
     public MovieComponent getMovieComponent() {
         return movieComponent;
     }
+
+    public MovieAppComponent getMovieAppComponent() {
+        return movieAppComponent;
+    }
 }

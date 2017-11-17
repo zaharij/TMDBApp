@@ -1,7 +1,8 @@
-package com.centaurs.tmdbapp.data;
+package com.centaurs.tmdbapp.data.api;
 
 import com.centaurs.tmdbapp.data.models.Configuration;
 import com.centaurs.tmdbapp.data.models.Movie;
+import com.centaurs.tmdbapp.data.models.MoviesTrailer;
 import com.centaurs.tmdbapp.data.models.TopRatedMovies;
 
 import retrofit2.Call;
@@ -31,5 +32,12 @@ interface IMoviesApi {
         @Path("movie_id") int movieId,
         @Query(API_KEY_QUERY) String apiKey,
         @Query(LANGUAGE_KEY) String language
+    );
+
+    @GET("movie/{movie_id}/videos")
+    Call<MoviesTrailer> getMovieTrailer(
+            @Path("movie_id") int movieId,
+            @Query(API_KEY_QUERY) String apiKey,
+            @Query(LANGUAGE_KEY) String language
     );
 }

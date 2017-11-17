@@ -21,10 +21,16 @@ public  interface IMoviesListContract {
         void goToNetworkConnectionTroublesFragment();
         void setPoster(String key, Drawable drawable);
         void setResultListToAdapter(List<Movie> results);
+        void setSelectedMoviesIdsListToAdapter(List<Integer> selectedMoviesIdsList);
         void notifyItemInserted(boolean isLoadingAdded, int startPosition, int position);
         void notifyItemRemoved(boolean isLoadingAdded, int positionStart, int itemCount);
         void showTroublesLoadingNextPageText(String message);
         void hideTroublesLoadingNextPageText();
+        void notifyAdapterDataSetChanged();
+        void showToolbar();
+        void hideToolbar();
+        void setSelectedMoviesNumber(String numberStr);
+        void showToast(String message);
     }
 
     interface IPresenter extends IBasePresenter<IView>{
@@ -35,5 +41,8 @@ public  interface IMoviesListContract {
         void onPutResultsToAdapter(@NotNull TopRatedMovies response);
         void onNeedPoster(String posterPath);
         void onItemClicked(int movieId);
+        void onItemLongClicked(int movieId);
+        boolean onBackPressed();
+        void onSelectedVideosClicked();
     }
 }
