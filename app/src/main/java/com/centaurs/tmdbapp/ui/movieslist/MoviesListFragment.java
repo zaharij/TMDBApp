@@ -287,7 +287,7 @@ public class MoviesListFragment extends Fragment implements IMoviesListContract.
     };
 
     @Override
-    public boolean handleOnnBackPressedForResult() {
+    public boolean handleOnBackPressedForResult() {
         return presenter.onBackPressed();
     }
 }

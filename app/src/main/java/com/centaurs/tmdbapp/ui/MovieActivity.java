@@ -21,7 +21,7 @@ public class MovieActivity extends AppCompatActivity {
     public static final String START_FRAGMENT_EXTRA = "MovieActivity";
 
     public interface OnBackPressedListener{
-        boolean handleOnnBackPressedForResult();
+        boolean handleOnBackPressedForResult();
     }
 
     @Override
@@ -40,6 +40,7 @@ public class MovieActivity extends AppCompatActivity {
 
         if (getIntent().getStringExtra(START_FRAGMENT_EXTRA) != null
                 && getIntent().getStringExtra(START_FRAGMENT_EXTRA).equals(MOVIES_LIST_FRAGMENT_EXTRA)){
+            getIntent().removeExtra(START_FRAGMENT_EXTRA);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_container, new MoviesListFragment()).commit();
         } else if (savedInstanceState == null){
@@ -53,7 +54,7 @@ public class MovieActivity extends AppCompatActivity {
         FragmentManager fragmentManager = getSupportFragmentManager();
         for (Fragment fragment: fragmentManager.getFragments()){
             if (fragment instanceof OnBackPressedListener){
-                if (((OnBackPressedListener) fragment).handleOnnBackPressedForResult()){
+                if (((OnBackPressedListener) fragment).handleOnBackPressedForResult()){
                     return;
                 }
             }
