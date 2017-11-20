@@ -109,6 +109,7 @@ public class VideoLoaderService extends Service {
             builder.setContentTitle(getApplicationContext().getResources().getString(R.string.preparing_message));
         } else if (progress < MAX_PROGRESS){
             builder.setProgress(MAX_PROGRESS, progress, false);
+            builder.setContentInfo(this.getString(R.string.progress_status, String.valueOf(progress)));
             builder.setContentTitle(getApplicationContext().getResources().getString(R.string.downloading_message));
         } else {
             if (isSuccess != null) {
