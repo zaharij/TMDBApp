@@ -12,6 +12,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -21,9 +23,11 @@ import retrofit2.Response;
 public class FileLoader {
     private final String TAG = "FileLoaderTag";
     private final int FILE_READER_BYTE = 4096;
+    public static final int LOAD_FILE_THREAD_POOL_NUMBER = 5;
     private IFileLoaderClient fileDownloadClient;
     public static final String DOWNLOAD_FILE_DIRECTORY = String.valueOf(Environment
             .getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES));
+    private ExecutorService executor;
 
     public interface IProgressListener{
         void onProgressChanged(long max, long progress);
@@ -31,6 +35,7 @@ public class FileLoader {
 
     public FileLoader(){
         fileDownloadClient = RetrofitClient.getRetrofitClient().create(IFileLoaderClient.class);
+        executor = Executors.newFixedThreadPool(LOAD_FILE_THREAD_POOL_NUMBER);
     }
 
     public void downloadFile(final IDataCallback<Boolean> callback, final IProgressListener progressListener
@@ -38,14 +43,14 @@ public class FileLoader {
         fileDownloadClient.downloadVideoFile(url).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull final Response<ResponseBody> response) {
-                new Thread(new Runnable() {
+                executor.execute(new Thread(new Runnable() {
                     @Override
                     public void run() {
                         if (response.body() != null){
                             callback.onResponse(writeResponseBodyToDisk(progressListener, response.body(), fileName));
                         }
                     }
-                }).start();
+                }));
             }
 
             @Override

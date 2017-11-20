@@ -23,9 +23,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
+import static com.centaurs.tmdbapp.data.fileload.FileLoader.LOAD_FILE_THREAD_POOL_NUMBER;
+
 public class VideoLoaderService extends Service {
     public static final String MOVIE_ID_SERVICE_EXTRA = "MovieIdService";
-    private final int THREAD_POOL_SIZE = 5;
+    private final int THREAD_POOL_SIZE = LOAD_FILE_THREAD_POOL_NUMBER;
     private final int MAX_PROGRESS = 100;
     private ExecutorService executorService;
     private NotificationManager notificationManager;
