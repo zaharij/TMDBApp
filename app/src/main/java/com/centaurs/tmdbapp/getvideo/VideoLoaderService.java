@@ -32,7 +32,7 @@ public class VideoLoaderService extends Service {
     private ExecutorService executorService;
     private NotificationManager notificationManager;
     private AtomicInteger startIdsCounter;
-    private int lastStartId;
+    private HandledStartIdsTemp handledStartIdsTemp;
     @Inject
     MoviesApi moviesApi;
     @Inject
@@ -55,6 +55,7 @@ public class VideoLoaderService extends Service {
         executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
         startIdsCounter = new AtomicInteger(0);
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        handledStartIdsTemp = new HandledStartIdsTemp(this);
     }
 
     @Nullable
@@ -65,22 +66,27 @@ public class VideoLoaderService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        notifyUser(this.getResources().getString(R.string.wait_message), false, startId, 0, 0);
-        startIdsCounter.incrementAndGet();
-        lastStartId = lastStartId < startId ? startId : lastStartId;
-        executorService.execute(new VideoLoader(progressListener, moviesApi, fileLoader, youtubeApi
-                , videoLoaderCallback, intent.getExtras().getInt(MOVIE_ID_SERVICE_EXTRA), startId, System.currentTimeMillis()));
+        if (flags != START_FLAG_REDELIVERY || !handledStartIdsTemp.isSuccessId(startId)){
+            notifyUser(this.getResources().getString(R.string.wait_message), false, startId, 0, 0);
+            startIdsCounter.incrementAndGet();
+            executorService.execute(new VideoLoader(progressListener, moviesApi, fileLoader, youtubeApi
+                    , videoLoaderCallback, intent.getExtras().getInt(MOVIE_ID_SERVICE_EXTRA), startId, System.currentTimeMillis()));
+        }
         return START_REDELIVER_INTENT;
+    }
+
+    @Override
+    public void onDestroy() {
+        handledStartIdsTemp.clearTemp();
+        super.onDestroy();
     }
 
     private IVideoLoaderCallback videoLoaderCallback = new IVideoLoaderCallback() {
         @Override
         public void onResult(String movieTitle, Boolean isSuccess, int startId) {
-            if (startId < lastStartId) {
-                stopSelf(startId);
-            }
+            handledStartIdsTemp.putHandledStartId(startId, isSuccess);
             if (startIdsCounter.decrementAndGet() == 0){
-                stopSelf(lastStartId);
+                stopSelf();
             }
             notifyUser(movieTitle, isSuccess, startId, MAX_PROGRESS, 0);
         }
