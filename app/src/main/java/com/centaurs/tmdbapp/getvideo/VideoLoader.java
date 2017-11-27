@@ -10,18 +10,18 @@ import com.centaurs.tmdbapp.data.models.Movie;
 import com.centaurs.tmdbapp.data.models.MovieTrailer;
 import com.centaurs.tmdbapp.data.models.MoviesTrailer;
 import com.centaurs.tmdbapp.data.util.IDataCallback;
+import com.centaurs.tmdbapp.di.Injector;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-class VideoLoader implements Runnable{
+import javax.inject.Inject;
+
+public class VideoLoader implements Runnable{
     private final String TAG = "VideoLoader";
     private final String VIDEO_FILE_EXTENSION = ".mp4";
     private final String SITE_YOUTUBE = "YouTube";
-    private MoviesApi moviesApi;
-    private FileLoader fileLoader;
-    private YoutubeApi youtubeApi;
     private Map<String, MovieTrailer> videoMap;
     private VideoLoaderService.IVideoLoaderCallback videoLoaderCallback;
     private int movieId;
@@ -30,14 +30,18 @@ class VideoLoader implements Runnable{
     private VideoLoaderService.IProgressListener progressListener;
     private int currentProgress;
     private long whenStartedMillis;
+    @Inject
+    MoviesApi moviesApi;
+    @Inject
+    FileLoader fileLoader;
+    @Inject
+    YoutubeApi youtubeApi;
 
-    VideoLoader (VideoLoaderService.IProgressListener progressListener, MoviesApi moviesApi
-            , FileLoader fileLoader, YoutubeApi youtubeApi
-            , VideoLoaderService.IVideoLoaderCallback videoLoaderCallback, int movieId, int startId, long whenStartedMillis){
+    VideoLoader (VideoLoaderService.IProgressListener progressListener
+            , VideoLoaderService.IVideoLoaderCallback videoLoaderCallback, int movieId
+            , int startId, long whenStartedMillis){
+        Injector.getInstance().getMovieAppComponent().inject(this);
         this.progressListener = progressListener;
-        this.moviesApi = moviesApi;
-        this.fileLoader = fileLoader;
-        this.youtubeApi = youtubeApi;
         this.videoLoaderCallback = videoLoaderCallback;
         this.movieId = movieId;
         this.startId = startId;

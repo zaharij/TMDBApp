@@ -10,8 +10,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import com.centaurs.tmdbapp.R;
-import com.centaurs.tmdbapp.data.YoutubeApi;
-import com.centaurs.tmdbapp.data.api.MoviesApi;
 import com.centaurs.tmdbapp.data.fileload.FileLoader;
 import com.centaurs.tmdbapp.di.Injector;
 import com.centaurs.tmdbapp.ui.MovieActivity;
@@ -20,8 +18,6 @@ import com.centaurs.tmdbapp.ui.movieslist.MoviesListFragment;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.inject.Inject;
 
 import static com.centaurs.tmdbapp.data.fileload.FileLoader.LOAD_FILE_THREAD_POOL_NUMBER;
 
@@ -33,12 +29,7 @@ public class VideoLoaderService extends Service {
     private NotificationManager notificationManager;
     private AtomicInteger startIdsCounter;
     private HandledStartIdsTemp handledStartIdsTemp;
-    @Inject
-    MoviesApi moviesApi;
-    @Inject
-    FileLoader fileLoader;
-    @Inject
-    YoutubeApi youtubeApi;
+    private VideoLoader videoLoader;
 
     interface IVideoLoaderCallback{
         void onResult(String movieTitle, Boolean isSuccess, int startId);
@@ -51,11 +42,11 @@ public class VideoLoaderService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Injector.getInstance(this).getMovieAppComponent().inject(this);
         executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
         startIdsCounter = new AtomicInteger(0);
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        handledStartIdsTemp = new HandledStartIdsTemp(this);
+        handledStartIdsTemp = new HandledStartIdsTemp();
+        Injector.getInstance(this);
     }
 
     @Nullable
@@ -69,8 +60,9 @@ public class VideoLoaderService extends Service {
         if (flags != START_FLAG_REDELIVERY || !handledStartIdsTemp.isSuccessId(startId)){
             notifyUser(this.getResources().getString(R.string.wait_message), false, startId, 0, 0);
             startIdsCounter.incrementAndGet();
-            executorService.execute(new VideoLoader(progressListener, moviesApi, fileLoader, youtubeApi
-                    , videoLoaderCallback, intent.getExtras().getInt(MOVIE_ID_SERVICE_EXTRA), startId, System.currentTimeMillis()));
+            videoLoader = new VideoLoader(progressListener
+                    , videoLoaderCallback, intent.getExtras().getInt(MOVIE_ID_SERVICE_EXTRA), startId, System.currentTimeMillis());
+            executorService.execute(videoLoader);
         }
         return START_REDELIVER_INTENT;
     }
